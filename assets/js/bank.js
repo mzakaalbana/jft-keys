@@ -1,8 +1,25 @@
-// bank.js — data belajar sementara
+// assets/js/bank.js
+// Contoh bank soal awal
+
 window.BANK = [
-  { jp: "住所（じゅうしょ）", romaji: "jūsho", idn: "Alamat" },
-  { jp: "軽い（かるい）", romaji: "karui", idn: "Ringan" },
-  { jp: "映画（えいが）", romaji: "eiga", idn: "Film" },
-  { jp: "耳（みみ）", romaji: "mimi", idn: "Telinga" },
-  { jp: "花火（はなび）", romaji: "hanabi", idn: "Kembang api" }
+  {
+    id: "sesi1-001",
+    prompt: "かぎ（gambar kunci） artinya apa?",
+    choices: [
+      { key: "A", t: "Pintu" },
+      { key: "B", t: "Kunci" },
+      { key: "C", t: "Jendela" },
+    ],
+    correctKey: "B",
+  },
+  {
+    id: "sesi1-002",
+    prompt: "けっこん（gambar orang menikah） berarti apa?",
+    choices: [
+      { key: "A", t: "Menikah" },
+      { key: "B", t: "Bercerai" },
+      { key: "C", t: "Berlibur" },
+    ],
+    correctKey: "A",
+  },
 ];
