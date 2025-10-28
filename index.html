@@ -3,165 +3,117 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>JFT Keys — Belajar • Latihan • Ujian</title>
+  <title>KISI-KISI JFT</title>
   <link rel="manifest" href="manifest.webmanifest" />
-  <!-- cache-bust -->
-  <link rel="stylesheet" href="assets/css/styles.css?v=20251028" />
-  <meta name="theme-color" content="#0b1220" />
+  <link rel="stylesheet" href="assets/css/styles.css" />
+  <meta name="theme-color" content="#d6b25e" />
 </head>
-<body class="page spa">
+<body>
   <header class="site-header">
-    <nav class="topbar container">
-      <div class="brand-wrap">
-        <div class="logo-dot"></div>
-        <a class="brand" href="#/belajar?sesi=1">JFT Keys</a>
-      </div>
+    <nav class="container topnav">
+      <div class="brand">KISI-KISI JFT</div>
 
       <div class="tabs" role="tablist" aria-label="Mode Pembelajaran">
-        <button class="tab" data-route="belajar" role="tab" aria-selected="true">Belajar</button>
-        <button class="tab" data-route="latihan" role="tab" aria-selected="false">Latihan</button>
-        <button class="tab" data-route="ujian" role="tab" aria-selected="false">Ujian</button>
+        <button class="tab" data-mode="learn" id="tab-learn" aria-selected="true">Belajar</button>
+        <button class="tab" data-mode="practice" id="tab-practice">Latihan</button>
+        <button class="tab" data-mode="exam" id="tab-exam">Ujian</button>
       </div>
 
-      <div class="session-seg" id="segSessions" role="group" aria-label="Pilih Sesi">
-        <button class="seg active" data-sesi="1">S1</button>
-        <button class="seg" data-sesi="2">S2</button>
-        <button class="seg" data-sesi="3">S3</button>
-        <button class="seg" data-sesi="4">S4</button>
+      <div class="sessions" role="tablist" aria-label="Pilih Sesi">
+        <button class="chip" data-session="s1" aria-selected="true">S1</button>
+        <button class="chip" data-session="s2">S2</button>
+        <button class="chip" data-session="s3">S3</button>
+        <button class="chip" data-session="s4">S4</button>
       </div>
     </nav>
   </header>
 
-  <main class="container main-area" id="viewRoot">
+  <main class="container page">
     <!-- BELAJAR -->
-    <section id="view-belajar" class="view active" aria-labelledby="tab-belajar">
-      <div class="panel">
-        <header class="panel-head">
-          <h1 class="title"><span class="title-emoji">📚</span> Belajar — <span id="titleBelajarSesi">Sesi 1</span></h1>
-          <p class="subtitle" id="subtitleBelajar">Memuat data…</p>
-        </header>
-        <div id="learnList" class="list">
-          <div class="skeleton">
-            <div class="skeleton-line w-90"></div>
-            <div class="skeleton-line w-80"></div>
-            <div class="skeleton-line w-70"></div>
-          </div>
-        </div>
-      </div>
+    <section id="panel-learn" class="panel active" aria-labelledby="tab-learn">
+      <header class="panel-head">
+        <h1>📚 Belajar — <span id="learnSessionName">Sesi 1</span></h1>
+        <p class="muted">Mode hafalan cepat. Format <b>kanji (hiragana)</b> dan arti Indonesia.</p>
+      </header>
+      <div id="learnList" class="grid"></div>
     </section>
 
     <!-- LATIHAN -->
-    <section id="view-latihan" class="view" aria-labelledby="tab-latihan">
-      <div class="panel">
-        <header class="panel-head">
-          <h1 class="title"><span class="title-emoji">📝</span> Latihan — <span id="titleLatihanSesi">Sesi 1</span></h1>
-          <p class="subtitle">Jawab satu per satu, submit di akhir.</p>
-        </header>
+    <section id="panel-practice" class="panel" aria-labelledby="tab-practice">
+      <header class="panel-head">
+        <h1>📝 Latihan — <span id="practiceSessionName">Sesi 1</span></h1>
+        <p class="muted">Jawab satu per satu, bisa mundur/maju. Skor tampil langsung saat submit.</p>
+      </header>
 
-        <div class="quiz">
-          <div class="quiz-top">
-            <span class="pill" id="quizProgress">Soal 1 / 1</span>
-            <span class="muted">Mode: Latihan</span>
-            <span class="spacer"></span>
-            <button id="btnResetLatihan" class="btn ghost">Reset</button>
-          </div>
-
-          <div id="quizStage">
-            <div class="skeleton">
-              <div class="skeleton-line w-80"></div>
-              <div class="skeleton-line w-90"></div>
-              <div class="skeleton-line w-70"></div>
-            </div>
-          </div>
-
-          <div class="quiz-actions">
-            <button id="btnPrev" class="btn ghost" disabled>Sebelumnya</button>
-            <div class="spacer"></div>
-            <button id="btnNext" class="btn">Selanjutnya</button>
-            <button id="btnSubmit" class="btn primary" hidden>Lihat Skor</button>
-          </div>
-        </div>
-
-        <div id="resultCard" class="result card hidden">
-          <h2>Hasil Latihan</h2>
-          <p id="scoreLine" class="lead">Skor: 0/0</p>
-          <details class="details">
-            <summary>Lihat ringkasan jawaban</summary>
-            <div id="answerReview"></div>
-          </details>
-          <div class="result-actions">
-            <button id="btnRetryLatihan" class="btn">Ulangi</button>
-            <button class="btn ghost" data-route-jump="belajar">Ke Belajar</button>
-          </div>
+      <div id="practiceStage" class="card">
+        <div class="skeleton">
+          <div class="skeleton-line w-80"></div>
+          <div class="skeleton-line w-90"></div>
+          <div class="skeleton-line w-70"></div>
         </div>
       </div>
+
+      <div class="row actions">
+        <button id="btnPrevP" class="btn ghost" disabled>Sebelumnya</button>
+        <div class="spacer"></div>
+        <button id="btnSubmitP" class="btn outline">Submit</button>
+        <button id="btnNextP" class="btn">Selanjutnya</button>
+      </div>
+
+      <section id="practiceResult" class="card hidden">
+        <h3>Hasil Latihan</h3>
+        <p id="practiceScore" class="lead">Skor: 0/0</p>
+        <details>
+          <summary>Lihat koreksi</summary>
+          <div id="practiceReview"></div>
+        </details>
+        <div class="row actions">
+          <button id="btnRetryP" class="btn">Ulangi</button>
+        </div>
+      </section>
     </section>
 
     <!-- UJIAN -->
-    <section id="view-ujian" class="view" aria-labelledby="tab-ujian">
-      <div class="panel">
-        <header class="panel-head">
-          <h1 class="title"><span class="title-emoji">🎯</span> Ujian — <span id="titleUjianSesi">Sesi 1</span></h1>
-          <p class="subtitle">Jawab semua, hasil & koreksi tampil setelah Submit.</p>
-        </header>
+    <section id="panel-exam" class="panel" aria-labelledby="tab-exam">
+      <header class="panel-head">
+        <h1>🎯 Ujian — <span id="examSessionName">Sesi 1</span></h1>
+        <p class="muted">Jawab semua dulu. Skor & koreksi muncul setelah tekan <b>Finish</b>.</p>
+      </header>
 
-        <div class="quiz">
-          <div class="quiz-top">
-            <span class="pill" id="examProgress">Soal 1 / 1</span>
-            <span class="muted">Mode: Ujian</span>
-            <span class="spacer"></span>
-            <button id="btnResetUjian" class="btn ghost">Reset</button>
-          </div>
-
-          <div id="examStage">
-            <div class="skeleton">
-              <div class="skeleton-line w-80"></div>
-              <div class="skeleton-line w-90"></div>
-              <div class="skeleton-line w-70"></div>
-            </div>
-          </div>
-
-          <div class="quiz-actions">
-            <button id="btnPrevExam" class="btn ghost" disabled>Sebelumnya</button>
-            <div class="spacer"></div>
-            <button id="btnNextExam" class="btn">Selanjutnya</button>
-            <button id="btnSubmitExam" class="btn primary" hidden>Selesai & Lihat Skor</button>
-          </div>
-        </div>
-
-        <div id="examResultCard" class="result card hidden">
-          <h2>Hasil Ujian</h2>
-          <p id="examScoreLine" class="lead">Skor: 0/0</p>
-          <details class="details">
-            <summary>Lihat koreksi & pembahasan</summary>
-            <div id="examAnswerReview"></div>
-          </details>
-          <div class="result-actions">
-            <button id="btnRetryUjian" class="btn">Ulangi Ujian</button>
-            <button class="btn ghost" data-route-jump="belajar">Ke Belajar</button>
-          </div>
+      <div id="examStage" class="card">
+        <div class="skeleton">
+          <div class="skeleton-line w-80"></div>
+          <div class="skeleton-line w-90"></div>
+          <div class="skeleton-line w-70"></div>
         </div>
       </div>
+
+      <div class="row actions">
+        <button id="btnPrevE" class="btn ghost" disabled>Sebelumnya</button>
+        <div class="spacer"></div>
+        <button id="btnFinishE" class="btn outline">Finish</button>
+        <button id="btnNextE" class="btn">Selanjutnya</button>
+      </div>
+
+      <section id="examResult" class="card hidden">
+        <h3>Hasil Ujian</h3>
+        <p id="examScore" class="lead">Skor: 0/0</p>
+        <details>
+          <summary>Lihat koreksi</summary>
+          <div id="examReview"></div>
+        </details>
+        <div class="row actions">
+          <button id="btnRetryE" class="btn">Ulangi</button>
+        </div>
+      </section>
     </section>
   </main>
 
   <footer class="site-footer">
-    <div class="container">
-      <small>© JFT Keys • UI/UX refresh</small>
-    </div>
+    <div class="container muted small">© KISI-KISI JFT • UI/UX gold theme</div>
   </footer>
 
-  <!-- cache-bust -->
-  <script src="assets/js/app.js?v=20251028"></script>
-  <script src="assets/js/render.js?v=20251028"></script>
-
-  <!-- Unregister SW lama agar cache tak ‘ngunci’ style -->
-  <script>
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.getRegistrations().then(regs => {
-        regs.forEach(r => r.unregister());
-      });
-    }
-  </script>
+  <script src="assets/js/render.js"></script>
+  <script src="assets/js/app.js"></script>
 </body>
 </html>
