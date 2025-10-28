@@ -1,0 +1,14 @@
+﻿# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/
+*.log
+
+# build / tools (kalau nanti pakai)
+dist/
+build/
+node_modules/
+coverage/
+
+# PWA cache (jaga-jaga)
+*.cache
