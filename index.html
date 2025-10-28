@@ -5,7 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>JFT Keys — Belajar • Latihan • Ujian</title>
   <link rel="manifest" href="manifest.webmanifest" />
-  <link rel="stylesheet" href="assets/css/styles.css" />
+  <!-- cache-bust -->
+  <link rel="stylesheet" href="assets/css/styles.css?v=20251028" />
   <meta name="theme-color" content="#0b1220" />
 </head>
 <body class="page spa">
@@ -32,17 +33,13 @@
   </header>
 
   <main class="container main-area" id="viewRoot">
-    <!-- View BELAJAR -->
+    <!-- BELAJAR -->
     <section id="view-belajar" class="view active" aria-labelledby="tab-belajar">
       <div class="panel">
         <header class="panel-head">
-          <h1 class="title">
-            <span class="title-emoji">📚</span>
-            Belajar — <span id="titleBelajarSesi">Sesi 1</span>
-          </h1>
+          <h1 class="title"><span class="title-emoji">📚</span> Belajar — <span id="titleBelajarSesi">Sesi 1</span></h1>
           <p class="subtitle" id="subtitleBelajar">Memuat data…</p>
         </header>
-
         <div id="learnList" class="list">
           <div class="skeleton">
             <div class="skeleton-line w-90"></div>
@@ -53,14 +50,11 @@
       </div>
     </section>
 
-    <!-- View LATIHAN -->
+    <!-- LATIHAN -->
     <section id="view-latihan" class="view" aria-labelledby="tab-latihan">
       <div class="panel">
         <header class="panel-head">
-          <h1 class="title">
-            <span class="title-emoji">📝</span>
-            Latihan — <span id="titleLatihanSesi">Sesi 1</span>
-          </h1>
+          <h1 class="title"><span class="title-emoji">📝</span> Latihan — <span id="titleLatihanSesi">Sesi 1</span></h1>
           <p class="subtitle">Jawab satu per satu, submit di akhir.</p>
         </header>
 
@@ -103,14 +97,11 @@
       </div>
     </section>
 
-    <!-- View UJIAN -->
+    <!-- UJIAN -->
     <section id="view-ujian" class="view" aria-labelledby="tab-ujian">
       <div class="panel">
         <header class="panel-head">
-          <h1 class="title">
-            <span class="title-emoji">🎯</span>
-            Ujian — <span id="titleUjianSesi">Sesi 1</span>
-          </h1>
+          <h1 class="title"><span class="title-emoji">🎯</span> Ujian — <span id="titleUjianSesi">Sesi 1</span></h1>
           <p class="subtitle">Jawab semua, hasil & koreksi tampil setelah Submit.</p>
         </header>
 
@@ -160,7 +151,17 @@
     </div>
   </footer>
 
-  <script src="assets/js/app.js"></script>
-  <script src="assets/js/render.js"></script>
+  <!-- cache-bust -->
+  <script src="assets/js/app.js?v=20251028"></script>
+  <script src="assets/js/render.js?v=20251028"></script>
+
+  <!-- Unregister SW lama agar cache tak ‘ngunci’ style -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.getRegistrations().then(regs => {
+        regs.forEach(r => r.unregister());
+      });
+    }
+  </script>
 </body>
 </html>
