@@ -3,42 +3,152 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>JFT Keys — Beranda</title>
+  <title>JFT Keys — Belajar • Latihan • Ujian</title>
   <link rel="manifest" href="manifest.webmanifest" />
   <link rel="stylesheet" href="assets/css/styles.css" />
+  <meta name="theme-color" content="#0b1220" />
 </head>
-<body class="page home-page">
+<body class="page spa">
   <header class="site-header">
-    <nav class="topnav container">
-      <a href="index.html" class="brand">JFT Keys</a>
-      <div class="spacer"></div>
-      <a href="belajar.html?sesi=1" class="link">Belajar</a>
-      <a href="latihan.html?sesi=1" class="link">Latihan</a>
-      <a href="ujian.html?sesi=1" class="link">Ujian</a>
+    <nav class="topbar container">
+      <div class="brand-wrap">
+        <div class="logo-dot"></div>
+        <a class="brand" href="#/belajar?sesi=1">JFT Keys</a>
+      </div>
+
+      <div class="tabs" role="tablist" aria-label="Mode Pembelajaran">
+        <button class="tab" data-route="belajar" role="tab" aria-selected="true">Belajar</button>
+        <button class="tab" data-route="latihan" role="tab" aria-selected="false">Latihan</button>
+        <button class="tab" data-route="ujian" role="tab" aria-selected="false">Ujian</button>
+      </div>
+
+      <div class="session-seg" id="segSessions" role="group" aria-label="Pilih Sesi">
+        <button class="seg active" data-sesi="1">S1</button>
+        <button class="seg" data-sesi="2">S2</button>
+        <button class="seg" data-sesi="3">S3</button>
+        <button class="seg" data-sesi="4">S4</button>
+      </div>
     </nav>
   </header>
 
-  <main class="container">
-    <section class="card">
-      <h1 class="quiz-title">Selamat datang 👋</h1>
-      <p class="muted">Pilih mode dan sesi yang ingin dipelajari/diujikan.</p>
+  <main class="container main-area" id="viewRoot">
+    <!-- View BELAJAR -->
+    <section id="view-belajar" class="view active" aria-labelledby="tab-belajar">
+      <div class="panel">
+        <header class="panel-head">
+          <h1 class="title">
+            <span class="title-emoji">📚</span>
+            Belajar — <span id="titleBelajarSesi">Sesi 1</span>
+          </h1>
+          <p class="subtitle" id="subtitleBelajar">Memuat data…</p>
+        </header>
 
-      <div class="grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1rem;margin-top:1rem">
-        <a class="btn primary" href="belajar.html?sesi=1">Belajar (Sesi 1)</a>
-        <a class="btn" href="latihan.html?sesi=1">Latihan (Sesi 1)</a>
-        <a class="btn" href="ujian.html?sesi=1">Ujian (Sesi 1)</a>
+        <div id="learnList" class="list">
+          <div class="skeleton">
+            <div class="skeleton-line w-90"></div>
+            <div class="skeleton-line w-80"></div>
+            <div class="skeleton-line w-70"></div>
+          </div>
+        </div>
       </div>
+    </section>
 
-      <div class="card" style="margin-top:1rem">
-        <h2 style="margin:0 0 .5rem">Pilih cepat</h2>
-        <div style="display:flex;flex-wrap:wrap;gap:.5rem">
-          <a class="pill" href="belajar.html?sesi=1">Belajar S1</a>
-          <a class="pill" href="belajar.html?sesi=2">Belajar S2</a>
-          <a class="pill" href="belajar.html?sesi=3">Belajar S3</a>
-          <a class="pill" href="belajar.html?sesi=4">Belajar S4</a>
-          <span class="spacer"></span>
-          <a class="pill" href="latihan.html?sesi=2">Latihan S2</a>
-          <a class="pill" href="ujian.html?sesi=3">Ujian S3</a>
+    <!-- View LATIHAN -->
+    <section id="view-latihan" class="view" aria-labelledby="tab-latihan">
+      <div class="panel">
+        <header class="panel-head">
+          <h1 class="title">
+            <span class="title-emoji">📝</span>
+            Latihan — <span id="titleLatihanSesi">Sesi 1</span>
+          </h1>
+          <p class="subtitle">Jawab satu per satu, submit di akhir.</p>
+        </header>
+
+        <div class="quiz">
+          <div class="quiz-top">
+            <span class="pill" id="quizProgress">Soal 1 / 1</span>
+            <span class="muted">Mode: Latihan</span>
+            <span class="spacer"></span>
+            <button id="btnResetLatihan" class="btn ghost">Reset</button>
+          </div>
+
+          <div id="quizStage">
+            <div class="skeleton">
+              <div class="skeleton-line w-80"></div>
+              <div class="skeleton-line w-90"></div>
+              <div class="skeleton-line w-70"></div>
+            </div>
+          </div>
+
+          <div class="quiz-actions">
+            <button id="btnPrev" class="btn ghost" disabled>Sebelumnya</button>
+            <div class="spacer"></div>
+            <button id="btnNext" class="btn">Selanjutnya</button>
+            <button id="btnSubmit" class="btn primary" hidden>Lihat Skor</button>
+          </div>
+        </div>
+
+        <div id="resultCard" class="result card hidden">
+          <h2>Hasil Latihan</h2>
+          <p id="scoreLine" class="lead">Skor: 0/0</p>
+          <details class="details">
+            <summary>Lihat ringkasan jawaban</summary>
+            <div id="answerReview"></div>
+          </details>
+          <div class="result-actions">
+            <button id="btnRetryLatihan" class="btn">Ulangi</button>
+            <button class="btn ghost" data-route-jump="belajar">Ke Belajar</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- View UJIAN -->
+    <section id="view-ujian" class="view" aria-labelledby="tab-ujian">
+      <div class="panel">
+        <header class="panel-head">
+          <h1 class="title">
+            <span class="title-emoji">🎯</span>
+            Ujian — <span id="titleUjianSesi">Sesi 1</span>
+          </h1>
+          <p class="subtitle">Jawab semua, hasil & koreksi tampil setelah Submit.</p>
+        </header>
+
+        <div class="quiz">
+          <div class="quiz-top">
+            <span class="pill" id="examProgress">Soal 1 / 1</span>
+            <span class="muted">Mode: Ujian</span>
+            <span class="spacer"></span>
+            <button id="btnResetUjian" class="btn ghost">Reset</button>
+          </div>
+
+          <div id="examStage">
+            <div class="skeleton">
+              <div class="skeleton-line w-80"></div>
+              <div class="skeleton-line w-90"></div>
+              <div class="skeleton-line w-70"></div>
+            </div>
+          </div>
+
+          <div class="quiz-actions">
+            <button id="btnPrevExam" class="btn ghost" disabled>Sebelumnya</button>
+            <div class="spacer"></div>
+            <button id="btnNextExam" class="btn">Selanjutnya</button>
+            <button id="btnSubmitExam" class="btn primary" hidden>Selesai & Lihat Skor</button>
+          </div>
+        </div>
+
+        <div id="examResultCard" class="result card hidden">
+          <h2>Hasil Ujian</h2>
+          <p id="examScoreLine" class="lead">Skor: 0/0</p>
+          <details class="details">
+            <summary>Lihat koreksi & pembahasan</summary>
+            <div id="examAnswerReview"></div>
+          </details>
+          <div class="result-actions">
+            <button id="btnRetryUjian" class="btn">Ulangi Ujian</button>
+            <button class="btn ghost" data-route-jump="belajar">Ke Belajar</button>
+          </div>
         </div>
       </div>
     </section>
@@ -46,10 +156,11 @@
 
   <footer class="site-footer">
     <div class="container">
-      <small>© JFT Keys</small>
+      <small>© JFT Keys • UI/UX refresh</small>
     </div>
   </footer>
 
   <script src="assets/js/app.js"></script>
+  <script src="assets/js/render.js"></script>
 </body>
 </html>

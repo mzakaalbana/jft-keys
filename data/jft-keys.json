@@ -1,40 +1,34 @@
 {
   "meta": {
     "title": "JFT Keys",
-    "version": "1.0.0"
+    "version": "2.0.0"
   },
   "sessions": {
     "1": {
       "title": "Sesi 1",
       "items": [
-        /* 
-         Format umum item belajar (campuran kosakata, kalimat, gambar):
-         {
-           "id": 1,
-           "type": "vocab|kanji|expr|img|cloze|info",
-           "jp": "住所 (じゅうしょ)",
-           "hira": "じゅうしょ",
-           "romaji": "jūsho",
-           "idn": "alamat",
-           "note": "opsional, catatan tambahan",
-           "img": "img/key.png"   // kalau ada
-         }
-         — Jika item ingin langsung punya soal (latihan/ujian) khusus:
-         tambah: "prompt", "choices": ["A","B","C"], "answerKey": "A"
+        /* TEMP (kosong dulu). Setelah ini, saya akan isi 100% sesuai kisi-kisi final Anda tanpa mengubah apapun.
+           Format item contoh:
+           {
+             "id": 1,
+             "type": "vocab|kanji|expr|img|cloze|info",
+             "jp": "住所",
+             "hira": "じゅうしょ",
+             "romaji": "jūsho",
+             "idn": "alamat",
+             "note": "opsional",
+             "img": "img/xxx.png",
+
+             // Jika ingin MCQ custom (opsional):
+             "prompt": "Arti 住所 (じゅうしょ) adalah ...",
+             "choices": ["alamat","kantor","rumah"],
+             "answerKey": "A"
+           }
         */
       ]
     },
-    "2": {
-      "title": "Sesi 2 (Ekspresi)",
-      "items": []
-    },
-    "3": {
-      "title": "Sesi 3 (Chōkai)",
-      "items": []
-    },
-    "4": {
-      "title": "Sesi 4 (Dokkai)",
-      "items": []
-    }
+    "2": { "title": "Sesi 2 (Ekspresi)", "items": [] },
+    "3": { "title": "Sesi 3 (Chōkai)",  "items": [] },
+    "4": { "title": "Sesi 4 (Dokkai)",  "items": [] }
   }
 }

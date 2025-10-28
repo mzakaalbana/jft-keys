@@ -1,70 +1,76 @@
+/* Render helpers only */
 window.Render = (function(){
+  function $(sel, root=document){
+    return root.querySelector(sel);
+  }
+  function $all(sel, root=document){
+    return Array.from(root.querySelectorAll(sel));
+  }
 
-  function updatePageTitle(mode, sesi){
-    const t = document.getElementById('pageTitle');
-    if(t) t.textContent = `${mode} — Sesi ${sesi}`;
+  function setText(id, text){
+    const el = document.getElementById(id);
+    if(el) el.textContent = text;
   }
-  function updateSessionLinks(toPracticeId, toExamId, sesi){
-    const p = document.getElementById(toPracticeId);
-    const e = document.getElementById(toExamId);
-    if(p) p.href = `latihan.html?sesi=${sesi}`;
-    if(e) e.href = `ujian.html?sesi=${sesi}`;
-  }
-  function updateCrossLinks(ids, sesi){
-    const {learn, exam} = ids;
-    const l = document.getElementById(learn);
-    const e = document.getElementById(exam);
-    if(l) l.href = `belajar.html?sesi=${sesi}`;
-    if(e) e.href = `ujian.html?sesi=${sesi}`;
-  }
-  function updateExamLinks(ids, sesi){
-    const {learn, practice} = ids;
-    const l = document.getElementById(learn);
-    const p = document.getElementById(practice);
-    if(l) l.href = `belajar.html?sesi=${sesi}`;
-    if(p) p.href = `latihan.html?sesi=${sesi}`;
+
+  function htmlEscape(s){
+    return String(s)
+      .replaceAll('&','&amp;').replaceAll('<','&lt;')
+      .replaceAll('>','&gt;').replaceAll('"','&quot;')
+      .replaceAll("'",'&#39;');
   }
 
   function renderLearnList(containerId, items){
     const el = document.getElementById(containerId);
+    if(!el) return;
     if(!items || items.length===0){
       el.innerHTML = `<div class="empty">Belum ada item pada sesi ini.</div>`;
       return;
     }
     el.innerHTML = items.map((it, i)=>{
-      const main = it.jp || it.kanji || it.word || it.text || it.prompt || `Item ${i+1}`;
-      const hint = [
-        it.hira ? `(${it.hira})` : '',
-        it.romaji ? `• ${it.romaji}` : '',
-        it.idn ? `• ${it.idn}` : ''
-      ].filter(Boolean).join(' ');
-      const extra = it.note ? `<div class="muted" style="margin-top:.3rem">${escapeHTML(it.note)}</div>` : '';
+      // Main line: Kanji/JP — with (hiragana)
+      const main = it.jp || it.kanji || it.word || it.text || `Item ${i+1}`;
+      const hira = it.hira ? ` (${htmlEscape(it.hira)})` : '';
+      const romaji = it.romaji ? ` • ${htmlEscape(it.romaji)}` : '';
+      const idn = it.idn ? ` • ${htmlEscape(it.idn)}` : '';
+      const line2 = [romaji, idn].filter(Boolean).join('');
+
+      const tag = it.type ? `<span class="tag">${htmlEscape(it.type)}</span>` : '';
+      const note = it.note ? `<div class="anno">${htmlEscape(it.note)}</div>` : '';
+
       return `
-        <div class="option" style="align-items:flex-start">
-          <div class="opt-text">
-            <div><b>${escapeHTML(main)}</b> ${escapeHTML(hint)}</div>
-            ${extra}
+        <div class="row">
+          <div class="content">
+            <div class="main">${htmlEscape(main)}${hira}</div>
+            ${line2 ? `<div class="anno">${line2}</div>` : ''}
+            ${tag}${note}
           </div>
-        </div>`;
+        </div>
+      `;
     }).join('');
   }
 
   function renderQuestion(containerId, q, idx, total, pickedKey=null){
     const el = document.getElementById(containerId);
+    if(!el) return;
     const opts = q.choices.map(c=>{
       const checked = pickedKey===c.key ? 'checked' : '';
       return `
         <label class="option">
           <input type="radio" name="opt" value="${c.key}" ${checked}/>
-          <div class="opt-text"><b>${c.key}.</b> ${escapeHTML(c.text)}</div>
+          <div class="opt-text"><b>${c.key}.</b> ${htmlEscape(c.text)}</div>
         </label>`;
     }).join('');
     el.innerHTML = `
-      <div class="quiz-q">
+      <div class="card">
         <div class="muted" style="margin-bottom:.35rem">Soal ${idx+1} dari ${total}</div>
-        <div class="lead" style="margin-bottom:.5rem">${escapeHTML(q.prompt)}</div>
+        <div class="lead" style="margin-bottom:.5rem">${htmlEscape(q.prompt)}</div>
         ${opts}
       </div>`;
+  }
+
+  function emptyQuiz(containerId, message){
+    const el = document.getElementById(containerId);
+    if(el) el.innerHTML = `<div class="empty">${htmlEscape(message)}</div>`;
   }
 
   function readAnswer(){
@@ -77,10 +83,10 @@ window.Render = (function(){
     if(pill) pill.textContent = `Soal ${n} / ${total}`;
   }
 
-  function toggleNavButtons(idx, total){
-    const prev = document.getElementById('btnPrev');
-    const next = document.getElementById('btnNext');
-    const submit = document.getElementById('btnSubmit');
+  function toggleNavButtons(prevId, nextId, submitId, idx, total){
+    const prev = document.getElementById(prevId);
+    const next = document.getElementById(nextId);
+    const submit = document.getElementById(submitId);
     if(prev) prev.disabled = (idx===0);
     if(next && submit){
       if(idx < total-1){ next.hidden=false; submit.hidden=true; }
@@ -88,51 +94,47 @@ window.Render = (function(){
     }
   }
 
-  function showResult(result, sesi, {mode='practice'}={}){
-    const stage = document.getElementById('quizStage');
-    const card = document.getElementById('resultCard');
-    const scoreLine = document.getElementById('scoreLine');
-    const reviewBox = document.getElementById('answerReview');
-    const retry = document.getElementById('retryLink');
-    const learn = document.getElementById('learnLink');
+  function showResult(cardId, scoreId, reviewId, result, sesi, {mode='practice'}={}){
+    const card = document.getElementById(cardId);
+    const scoreLine = document.getElementById(scoreId);
+    const reviewBox = document.getElementById(reviewId);
+    if(!card || !scoreLine || !reviewBox) return;
 
-    stage.closest('.card').classList.add('hidden');
+    // hide quiz container near this card
+    const wrap = card.closest('.panel');
+    const quizBlock = wrap.querySelector('.quiz');
+    if(quizBlock) quizBlock.classList.add('hidden');
+
     card.classList.remove('hidden');
-
     scoreLine.textContent = `Skor: ${result.correct}/${result.total}`;
+
     reviewBox.innerHTML = result.review.map(r=>{
-      const choiceLines = r.choices.map(c=>{
+      const rows = r.choices.map(c=>{
         const mark = c.key===r.correct ? '✅' : (c.key===r.picked ? '❌' : '•');
-        return `<div class="muted">${mark} ${c.key}. ${escapeHTML(c.text)}</div>`;
+        return `<div class="muted">${mark} ${c.key}. ${htmlEscape(c.text)}</div>`;
       }).join('');
       return `
         <div class="card" style="margin:.6rem 0;padding:.8rem">
-          <div style="margin-bottom:.35rem"><b>${r.index}.</b> ${escapeHTML(r.prompt)}</div>
-          ${choiceLines}
+          <div style="margin-bottom:.35rem"><b>${r.index}.</b> ${htmlEscape(r.prompt)}</div>
+          ${rows}
         </div>`;
     }).join('');
-
-    retry.href = location.pathname + `?sesi=${sesi}`;
-    learn.href = `belajar.html?sesi=${sesi}`;
   }
 
-  function escapeHTML(s){
-    return String(s)
-      .replaceAll('&','&amp;').replaceAll('<','&lt;')
-      .replaceAll('>','&gt;').replaceAll('"','&quot;')
-      .replaceAll("'",'&#39;');
+  function onClick(id, fn){
+    const el = document.getElementById(id);
+    if(el) el.addEventListener('click', fn);
+  }
+
+  function show(selector, yes=true, root=document){
+    const el = (typeof selector==='string') ? root.querySelector(selector) : selector;
+    if(!el) return;
+    if(yes) el.classList.remove('hidden'); else el.classList.add('hidden');
   }
 
   return {
-    updatePageTitle,
-    updateSessionLinks,
-    updateCrossLinks,
-    updateExamLinks,
-    renderLearnList,
-    renderQuestion,
-    readAnswer,
-    updateProgress,
-    toggleNavButtons,
-    showResult
+    setText, renderLearnList, renderQuestion, emptyQuiz,
+    readAnswer, updateProgress, toggleNavButtons, showResult,
+    onClick, show, $, $all
   };
 })();
