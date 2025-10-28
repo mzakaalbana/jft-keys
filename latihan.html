@@ -8,6 +8,7 @@
   <link rel="stylesheet" href="assets/css/styles.css" />
 </head>
 <body class="page quiz-page">
+  <!-- ===================== Header ===================== -->
   <header class="site-header">
     <nav class="topnav container">
       <a href="index.html" class="brand">JFT Keys</a>
@@ -18,12 +19,14 @@
     </nav>
   </header>
 
+  <!-- ===================== Main ===================== -->
   <main class="container">
-    <section class="card quiz-card">
+    <!-- Kartu Kuis -->
+    <section class="card quiz-card" id="quizCard">
       <div class="quiz-head">
         <div class="pill" id="quizProgress">Soal 1 / 1</div>
         <h1 class="quiz-title">Latihan Pilihan Ganda</h1>
-        <p class="muted">Jawab pertanyaan satu per satu. Klik <b>Selanjutnya</b> untuk lanjut.</p>
+        <p class="muted">Jawab satu per satu. Klik <b>Selanjutnya</b> untuk lanjut, lalu <b>Lihat Skor</b> di akhir.</p>
       </div>
 
       <div id="quizStage">
@@ -36,19 +39,20 @@
       </div>
 
       <div class="quiz-actions">
-        <button id="btnPrev" class="btn ghost" disabled>Sebelumnya</button>
+        <button id="btnPrev" class="btn ghost" disabled>← Sebelumnya</button>
         <div class="spacer"></div>
-        <button id="btnNext" class="btn">Selanjutnya</button>
+        <button id="btnNext" class="btn">Berikutnya →</button>
         <button id="btnSubmit" class="btn primary" hidden>Lihat Skor</button>
       </div>
     </section>
 
+    <!-- Hasil -->
     <section id="resultCard" class="card result-card hidden">
       <h2>Hasil Latihan</h2>
       <p id="scoreLine" class="lead">Skor: 0/0</p>
       <details class="details">
-        <summary>Lihat ringkasan jawaban</summary>
-        <div id="answerReview"></div>
+        <summary>Ringkasan jawaban</summary>
+        <div id="answerReview" style="margin-top:.6rem"></div>
       </details>
       <div class="result-actions">
         <a href="latihan.html" class="btn">Ulangi</a>
@@ -57,29 +61,147 @@
     </section>
   </main>
 
+  <!-- ===================== Footer ===================== -->
   <footer class="site-footer">
     <div class="container">
       <small>© JFT Keys</small>
     </div>
   </footer>
 
-  <!-- Data soal -->
+  <!-- ===================== Scripts ===================== -->
   <script src="assets/js/bank.js"></script>
-  <!-- Logika kuis akan ditambahkan pada Step 4.2 -->
   <script>
-    // Placeholder kecil agar halaman tidak kosong saat BANK belum terisi/logika belum dibuat
-    (function boot() {
-      const stage = document.getElementById('quizStage');
-      const prog = document.getElementById('quizProgress');
-      if (!window.BANK || !Array.isArray(window.BANK) || window.BANK.length === 0) {
-        stage.innerHTML = `
+    // ---------- Util ----------
+    const $ = (sel, el = document) => el.querySelector(sel);
+    const $$ = (sel, el = document) => Array.from(el.querySelectorAll(sel));
+
+    // ---------- State ----------
+    const BANK = Array.isArray(window.BANK) ? window.BANK : [];
+    let idx = 0;                                   // indeks soal saat ini
+    const answers = new Map();                     // idSoal -> key pilihan
+
+    // ---------- Elements ----------
+    const quizStage   = $('#quizStage');
+    const quizProgress= $('#quizProgress');
+    const btnPrev     = $('#btnPrev');
+    const btnNext     = $('#btnNext');
+    const btnSubmit   = $('#btnSubmit');
+    const resultCard  = $('#resultCard');
+    const scoreLine   = $('#scoreLine');
+    const answerReview= $('#answerReview');
+    const quizCard    = $('#quizCard');
+
+    // ---------- Render ----------
+    function render() {
+      if (BANK.length === 0) {
+        quizStage.innerHTML = `
           <div class="empty">
             <p>Data soal belum tersedia.</p>
             <p class="muted">Pastikan <code>assets/js/bank.js</code> berisi array <code>window.BANK</code>.</p>
           </div>`;
-        prog.textContent = 'Soal 0 / 0';
+        quizProgress.textContent = 'Soal 0 / 0';
+        btnPrev.disabled = true; btnNext.disabled = true;
+        return;
       }
-    })();
+
+      const total = BANK.length;
+      const item = BANK[idx];
+
+      // progress
+      quizProgress.textContent = `Soal ${idx + 1} / ${total}`;
+
+      // html soal
+      const chosen = answers.get(item.id) || null;
+
+      const optionsHTML = item.choices.map((ch, i) => {
+        const optId = `q${item.id}_opt${i}`;
+        const checked = chosen === ch.key ? 'checked' : '';
+        return `
+          <label class="option" for="${optId}">
+            <input type="radio" id="${optId}" name="q_${item.id}" value="${ch.key}" ${checked} />
+            <div class="opt-text">
+              <div>${escapeHTML(ch.t)}</div>
+            </div>
+          </label>
+        `;
+      }).join('');
+
+      quizStage.innerHTML = `
+        <div class="card" style="background:transparent; border:none; box-shadow:none; padding:0">
+          <p class="muted" style="margin-bottom:.35rem;">${escapeHTML(item.prompt)}</p>
+          <form id="qForm">${optionsHTML}</form>
+        </div>
+      `;
+
+      // nav state
+      btnPrev.disabled = idx === 0;
+      btnNext.hidden   = idx === total - 1;
+      btnSubmit.hidden = idx !== total - 1;
+
+      // handle pilih
+      $('#qForm').addEventListener('change', (e) => {
+        if (e.target && e.target.name === `q_${item.id}`) {
+          answers.set(item.id, e.target.value);
+        }
+      });
+    }
+
+    function escapeHTML(s) {
+      return String(s).replace(/[&<>"']/g, m => ({
+        '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+      }[m]));
+    }
+
+    // ---------- Actions ----------
+    btnPrev.addEventListener('click', () => {
+      if (idx > 0) { idx--; render(); }
+      scrollToTop();
+    });
+
+    btnNext.addEventListener('click', () => {
+      if (idx < BANK.length - 1) { idx++; render(); }
+      scrollToTop();
+    });
+
+    btnSubmit.addEventListener('click', () => {
+      const total = BANK.length;
+      let correct = 0;
+      const review = [];
+
+      for (const q of BANK) {
+        const picked = answers.get(q.id) || '(kosong)';
+        const isRight = picked === q.correctKey;
+        if (isRight) correct++;
+
+        const pickedText  = (q.choices.find(c => c.key === picked) || {}).t || '(kosong)';
+        const correctText = (q.choices.find(c => c.key === q.correctKey) || {}).t || '';
+
+        review.push(`
+          <div class="entry">
+            <div class="jp">${escapeHTML(q.prompt)}</div>
+            <div class="id" style="margin-top:.35rem">
+              Jawaban kamu: <b style="color:${isRight ? 'var(--ok)' : 'var(--danger)'}">${escapeHTML(pickedText)}</b>
+              ${isRight ? '' : `<div class="muted">Kunci: <b>${escapeHTML(correctText)}</b></div>`}
+            </div>
+          </div>
+        `);
+      }
+
+      scoreLine.textContent = `Skor: ${correct} / ${total}`;
+      answerReview.innerHTML = review.join('');
+
+      // tampilkan hasil
+      quizCard.classList.add('hidden');
+      resultCard.classList.remove('hidden');
+      scrollToTop();
+    });
+
+    function scrollToTop() {
+      try { window.scrollTo({ top: 0, behavior: 'smooth' }); } catch {}
+    }
+
+    // ---------- Boot ----------
+    render();
   </script>
 </body>
 </html>
