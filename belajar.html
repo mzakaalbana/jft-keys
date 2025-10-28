@@ -2,192 +2,81 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>JFT Keys – Belajar</title>
-
-  <link rel="stylesheet" href="./assets/css/styles.css?v=2" />
-  <script defer src="./assets/js/store.js?v=2"></script>
-  <script defer src="./assets/js/bank.js?v=2"></script>
-  <script defer src="./assets/js/render.js?v=2"></script>
-  <script defer src="./assets/js/app.js?v=2"></script>
-
-  <style>
-    :root {
-      --bg:#0b1220;
-      --card:#111a2b;
-      --muted:#8aa0c4;
-      --text:#e7eefc;
-      --accent:#7cc0ff;
-      --ok:#88f7b1;
-      --danger:#ff8aa1;
-      --line:#1e2940;
-    }
-    body{
-      margin:0;
-      font-family:'Inter',sans-serif;
-      background:var(--bg);
-      color:var(--text);
-      display:flex;
-      flex-direction:column;
-      align-items:center;
-      min-height:100vh;
-    }
-    nav{
-      display:flex;
-      gap:1rem;
-      margin:1.5rem 0;
-    }
-    a.nav-btn{
-      text-decoration:none;
-      color:var(--text);
-      background:var(--card);
-      padding:.6rem 1.2rem;
-      border-radius:.5rem;
-      border:1px solid var(--line);
-      transition:.25s;
-    }
-    a.nav-btn:hover{
-      background:var(--accent);
-      color:#000;
-    }
-    main{
-      background:var(--card);
-      border-radius:1rem;
-      box-shadow:0 0 20px rgba(0,0,0,.3);
-      padding:2rem;
-      max-width:700px;
-      width:90%;
-      margin-bottom:3rem;
-    }
-    h1{
-      text-align:center;
-      margin-top:0;
-      font-size:1.6rem;
-    }
-    .entry{
-      border-bottom:1px solid var(--line);
-      padding:.75rem 0;
-    }
-    .entry:last-child{
-      border-bottom:none;
-    }
-    .jp{
-      font-size:1.2rem;
-      font-weight:600;
-      color:var(--accent);
-    }
-    .hrg{
-      color:var(--muted);
-      font-size:.95rem;
-    }
-    .id{
-      margin-top:.3rem;
-      font-size:1rem;
-    }
-  </style>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Belajar — JFT Keys</title>
+  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="stylesheet" href="assets/css/styles.css" />
 </head>
-<body>
-  <nav>
-    <a href="./index.html" class="nav-btn">Menu</a>
-    <a href="./latihan.html" class="nav-btn">Latihan</a>
-    <a href="./ujian.html" class="nav-btn">Ujian</a>
-  </nav>
+<body class="page learn-page">
+  <header class="site-header">
+    <nav class="topnav container">
+      <a href="index.html" class="brand">JFT Keys</a>
+      <div class="spacer"></div>
+      <a href="belajar.html?sesi=1" class="link active">Belajar</a>
+      <a href="latihan.html?sesi=1" class="link">Latihan</a>
+      <a href="ujian.html?sesi=1" class="link">Ujian</a>
+    </nav>
+  </header>
 
-  <main id="list">
-    <h1>Daftar Belajar – Kisi-kisi JFT</h1>
-    <div class="entry">
-      <div class="jp">かぎ (かぎ)</div>
-      <div class="id">Kunci</div>
-    </div>
-    <div class="entry">
-      <div class="jp">けっこん (けっこん)</div>
-      <div class="id">Menikah</div>
-    </div>
-    <div class="entry">
-      <div class="jp">あんないします (あんないします)</div>
-      <div class="id">Menunjukkan jalan / memandu</div>
-    </div>
-    <div class="entry">
-      <div class="jp">住所 (じゅうしょ)</div>
-      <div class="id">Alamat</div>
-    </div>
-    <div class="entry">
-      <div class="jp">軽い (かるい)</div>
-      <div class="id">Ringan</div>
-    </div>
-    <div class="entry">
-      <div class="jp">映画 (えいが)</div>
-      <div class="id">Film</div>
-    </div>
-    <div class="entry">
-      <div class="jp">耳 (みみ)</div>
-      <div class="id">Telinga</div>
-    </div>
-    <div class="entry">
-      <div class="jp">目 (め)</div>
-      <div class="id">Mata</div>
-    </div>
-    <div class="entry">
-      <div class="jp">遠い (とおい)</div>
-      <div class="id">Jauh</div>
-    </div>
-    <div class="entry">
-      <div class="jp">公園 (こうえん)</div>
-      <div class="id">Taman</div>
-    </div>
-    <div class="entry">
-      <div class="jp">焼きます (やきます)</div>
-      <div class="id">Membakar</div>
-    </div>
-    <div class="entry">
-      <div class="jp">質問 (しつもん)</div>
-      <div class="id">Pertanyaan</div>
-    </div>
-    <div class="entry">
-      <div class="jp">近所 (きんじょ)</div>
-      <div class="id">Tetangga</div>
-    </div>
-    <div class="entry">
-      <div class="jp">服を着る (ふくをきる)</div>
-      <div class="id">Memakai baju</div>
-    </div>
-    <div class="entry">
-      <div class="jp">複雑 (ふくざつ)</div>
-      <div class="id">Rumit, kompleks</div>
-    </div>
-    <div class="entry">
-      <div class="jp">運動 (うんどう)</div>
-      <div class="id">Olahraga</div>
-    </div>
-    <div class="entry">
-      <div class="jp">泳ぎます (およぎます)</div>
-      <div class="id">Berenang</div>
-    </div>
-    <div class="entry">
-      <div class="jp">台風 (たいふう)</div>
-      <div class="id">Angin topan</div>
-    </div>
-    <div class="entry">
-      <div class="jp">牛乳 (ぎゅうにゅう)</div>
-      <div class="id">Susu sapi</div>
-    </div>
-    <div class="entry">
-      <div class="jp">駅 (えき)</div>
-      <div class="id">Stasiun</div>
-    </div>
-    <div class="entry">
-      <div class="jp">動物園 (どうぶつえん)</div>
-      <div class="id">Kebun binatang</div>
-    </div>
+  <main class="container">
+    <section class="card">
+      <div class="quiz-head">
+        <div style="display:flex;gap:.5rem;align-items:center;flex-wrap:wrap">
+          <h1 class="quiz-title" id="pageTitle" style="margin-right:.5rem">Belajar — Sesi 1</h1>
+          <label class="muted" for="sessionSelect">Ganti sesi:</label>
+          <select id="sessionSelect" class="btn" style="padding:.45rem .6rem">
+            <option value="1">Sesi 1</option>
+            <option value="2">Sesi 2</option>
+            <option value="3">Sesi 3</option>
+            <option value="4">Sesi 4</option>
+          </select>
+          <span class="spacer"></span>
+          <a id="toPractice" class="btn" href="latihan.html?sesi=1">Ke Latihan</a>
+          <a id="toExam" class="btn" href="ujian.html?sesi=1">Ke Ujian</a>
+        </div>
+        <p class="muted" id="sessionInfo">Memuat data…</p>
+      </div>
+
+      <div id="learnList" class="learn-list">
+        <!-- daftar item belajar -->
+        <div class="skeleton">
+          <div class="skeleton-line w-90"></div>
+          <div class="skeleton-line w-80"></div>
+          <div class="skeleton-line w-70"></div>
+        </div>
+      </div>
+    </section>
   </main>
 
+  <footer class="site-footer">
+    <div class="container">
+      <small>© JFT Keys</small>
+    </div>
+  </footer>
+
+  <script src="assets/js/app.js"></script>
+  <script src="assets/js/render.js"></script>
   <script>
-  // Service Worker dimatikan sementara agar tidak meng-cache versi lama
-  // if ('serviceWorker' in navigator) {
-  //   window.addEventListener('load', () => {
-  //     navigator.serviceWorker.register('./sw.js');
-  //   });
-  // }
+    (async function init(){
+      const sesi = App.getSessionFromURL() || 1;
+      document.getElementById('sessionSelect').value = String(sesi);
+
+      const data = await App.loadData();
+      const sess = App.pickSession(data, sesi);
+      Render.updatePageTitle('Belajar', sesi);
+      Render.updateSessionLinks('toPractice','toExam', sesi);
+
+      const info = document.getElementById('sessionInfo');
+      info.textContent = `${sess.title} • ${sess.items.length} item`;
+
+      Render.renderLearnList('learnList', sess.items);
+
+      document.getElementById('sessionSelect').addEventListener('change', (e)=>{
+        const s = Number(e.target.value);
+        App.replaceURLParam('sesi', s);
+        location.href = `belajar.html?sesi=${s}`;
+      });
+    })();
   </script>
 </body>
 </html>

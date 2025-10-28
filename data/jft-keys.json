@@ -1,0 +1,40 @@
+{
+  "meta": {
+    "title": "JFT Keys",
+    "version": "1.0.0"
+  },
+  "sessions": {
+    "1": {
+      "title": "Sesi 1",
+      "items": [
+        /* 
+         Format umum item belajar (campuran kosakata, kalimat, gambar):
+         {
+           "id": 1,
+           "type": "vocab|kanji|expr|img|cloze|info",
+           "jp": "住所 (じゅうしょ)",
+           "hira": "じゅうしょ",
+           "romaji": "jūsho",
+           "idn": "alamat",
+           "note": "opsional, catatan tambahan",
+           "img": "img/key.png"   // kalau ada
+         }
+         — Jika item ingin langsung punya soal (latihan/ujian) khusus:
+         tambah: "prompt", "choices": ["A","B","C"], "answerKey": "A"
+        */
+      ]
+    },
+    "2": {
+      "title": "Sesi 2 (Ekspresi)",
+      "items": []
+    },
+    "3": {
+      "title": "Sesi 3 (Chōkai)",
+      "items": []
+    },
+    "4": {
+      "title": "Sesi 4 (Dokkai)",
+      "items": []
+    }
+  }
+}

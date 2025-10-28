@@ -8,29 +8,34 @@
   <link rel="stylesheet" href="assets/css/styles.css" />
 </head>
 <body class="page quiz-page">
-  <!-- ===================== Header ===================== -->
   <header class="site-header">
     <nav class="topnav container">
       <a href="index.html" class="brand">JFT Keys</a>
       <div class="spacer"></div>
-      <a href="belajar.html" class="link">Belajar</a>
-      <a href="latihan.html" class="link active">Latihan</a>
-      <a href="ujian.html" class="link">Ujian</a>
+      <a href="belajar.html?sesi=1" class="link">Belajar</a>
+      <a href="latihan.html?sesi=1" class="link active">Latihan</a>
+      <a href="ujian.html?sesi=1" class="link">Ujian</a>
     </nav>
   </header>
 
-  <!-- ===================== Main ===================== -->
   <main class="container">
-    <!-- Kartu Kuis -->
-    <section class="card quiz-card" id="quizCard">
-      <div class="quiz-head">
+    <section class="card quiz-card">
+      <div class="quiz-head" style="display:flex;gap:.75rem;align-items:center;flex-wrap:wrap">
         <div class="pill" id="quizProgress">Soal 1 / 1</div>
-        <h1 class="quiz-title">Latihan Pilihan Ganda</h1>
-        <p class="muted">Jawab satu per satu. Klik <b>Selanjutnya</b> untuk lanjut, lalu <b>Lihat Skor</b> di akhir.</p>
+        <h1 class="quiz-title" id="pageTitle">Latihan — Sesi 1</h1>
+        <label class="muted" for="sessionSelect">Ganti sesi:</label>
+        <select id="sessionSelect" class="btn" style="padding:.45rem .6rem">
+          <option value="1">Sesi 1</option>
+          <option value="2">Sesi 2</option>
+          <option value="3">Sesi 3</option>
+          <option value="4">Sesi 4</option>
+        </select>
+        <span class="spacer"></span>
+        <a id="toLearn" class="btn" href="belajar.html?sesi=1">Ke Belajar</a>
+        <a id="toExam" class="btn" href="ujian.html?sesi=1">Ke Ujian</a>
       </div>
 
       <div id="quizStage">
-        <!-- Tempat render soal & pilihan -->
         <div class="skeleton">
           <div class="skeleton-line w-80"></div>
           <div class="skeleton-line w-90"></div>
@@ -39,169 +44,86 @@
       </div>
 
       <div class="quiz-actions">
-        <button id="btnPrev" class="btn ghost" disabled>← Sebelumnya</button>
+        <button id="btnPrev" class="btn ghost" disabled>Sebelumnya</button>
         <div class="spacer"></div>
-        <button id="btnNext" class="btn">Berikutnya →</button>
+        <button id="btnNext" class="btn">Selanjutnya</button>
         <button id="btnSubmit" class="btn primary" hidden>Lihat Skor</button>
       </div>
     </section>
 
-    <!-- Hasil -->
     <section id="resultCard" class="card result-card hidden">
       <h2>Hasil Latihan</h2>
       <p id="scoreLine" class="lead">Skor: 0/0</p>
       <details class="details">
-        <summary>Ringkasan jawaban</summary>
-        <div id="answerReview" style="margin-top:.6rem"></div>
+        <summary>Lihat ringkasan jawaban</summary>
+        <div id="answerReview"></div>
       </details>
       <div class="result-actions">
-        <a href="latihan.html" class="btn">Ulangi</a>
-        <a href="belajar.html" class="btn ghost">Ke Halaman Belajar</a>
+        <a id="retryLink" href="#" class="btn">Ulangi</a>
+        <a id="learnLink" href="#" class="btn ghost">Ke Halaman Belajar</a>
       </div>
     </section>
   </main>
 
-  <!-- ===================== Footer ===================== -->
   <footer class="site-footer">
     <div class="container">
       <small>© JFT Keys</small>
     </div>
   </footer>
 
-  <!-- ===================== Scripts ===================== -->
-  <script src="assets/js/bank.js"></script>
+  <script src="assets/js/app.js"></script>
+  <script src="assets/js/render.js"></script>
   <script>
-    // ---------- Util ----------
-    const $ = (sel, el = document) => el.querySelector(sel);
-    const $$ = (sel, el = document) => Array.from(el.querySelectorAll(sel));
+    (async function init(){
+      const sesi = App.getSessionFromURL() || 1;
+      document.getElementById('sessionSelect').value = String(sesi);
 
-    // ---------- State ----------
-    const BANK = Array.isArray(window.BANK) ? window.BANK : [];
-    let idx = 0;                                   // indeks soal saat ini
-    const answers = new Map();                     // idSoal -> key pilihan
+      const data = await App.loadData();
+      const sess = App.pickSession(data, sesi);
 
-    // ---------- Elements ----------
-    const quizStage   = $('#quizStage');
-    const quizProgress= $('#quizProgress');
-    const btnPrev     = $('#btnPrev');
-    const btnNext     = $('#btnNext');
-    const btnSubmit   = $('#btnSubmit');
-    const resultCard  = $('#resultCard');
-    const scoreLine   = $('#scoreLine');
-    const answerReview= $('#answerReview');
-    const quizCard    = $('#quizCard');
+      Render.updatePageTitle('Latihan', sesi);
+      Render.updateCrossLinks({learn:'toLearn', exam:'toExam'}, sesi);
 
-    // ---------- Render ----------
-    function render() {
-      if (BANK.length === 0) {
-        quizStage.innerHTML = `
-          <div class="empty">
-            <p>Data soal belum tersedia.</p>
-            <p class="muted">Pastikan <code>assets/js/bank.js</code> berisi array <code>window.BANK</code>.</p>
-          </div>`;
-        quizProgress.textContent = 'Soal 0 / 0';
-        btnPrev.disabled = true; btnNext.disabled = true;
-        return;
-      }
+      // Siapkan soal latihan (bentuk pilihan ganda sederhana)
+      const bank = App.buildPracticeBank(sess.items); // dari item belajar → multiple choice
+      const state = { idx:0, answers:[], bank };
+      Render.renderQuestion('quizStage', bank[state.idx], state.idx, bank.length);
+      Render.updateProgress('quizProgress', state.idx+1, bank.length);
+      Render.toggleNavButtons(state.idx, bank.length);
 
-      const total = BANK.length;
-      const item = BANK[idx];
+      // tombol navigasi
+      const btnPrev = document.getElementById('btnPrev');
+      const btnNext = document.getElementById('btnNext');
+      const btnSubmit = document.getElementById('btnSubmit');
 
-      // progress
-      quizProgress.textContent = `Soal ${idx + 1} / ${total}`;
-
-      // html soal
-      const chosen = answers.get(item.id) || null;
-
-      const optionsHTML = item.choices.map((ch, i) => {
-        const optId = `q${item.id}_opt${i}`;
-        const checked = chosen === ch.key ? 'checked' : '';
-        return `
-          <label class="option" for="${optId}">
-            <input type="radio" id="${optId}" name="q_${item.id}" value="${ch.key}" ${checked} />
-            <div class="opt-text">
-              <div>${escapeHTML(ch.t)}</div>
-            </div>
-          </label>
-        `;
-      }).join('');
-
-      quizStage.innerHTML = `
-        <div class="card" style="background:transparent; border:none; box-shadow:none; padding:0">
-          <p class="muted" style="margin-bottom:.35rem;">${escapeHTML(item.prompt)}</p>
-          <form id="qForm">${optionsHTML}</form>
-        </div>
-      `;
-
-      // nav state
-      btnPrev.disabled = idx === 0;
-      btnNext.hidden   = idx === total - 1;
-      btnSubmit.hidden = idx !== total - 1;
-
-      // handle pilih
-      $('#qForm').addEventListener('change', (e) => {
-        if (e.target && e.target.name === `q_${item.id}`) {
-          answers.set(item.id, e.target.value);
+      btnPrev.onclick = ()=> {
+        if(state.idx>0){ state.idx--; Render.renderQuestion('quizStage', bank[state.idx], state.idx, bank.length, state.answers[state.idx]); Render.updateProgress('quizProgress', state.idx+1, bank.length); Render.toggleNavButtons(state.idx, bank.length); }
+      };
+      btnNext.onclick = ()=> {
+        const sel = Render.readAnswer();
+        if(sel==null){ alert('Pilih jawaban dulu ya.'); return; }
+        state.answers[state.idx]=sel;
+        if(state.idx<bank.length-1){
+          state.idx++;
+          Render.renderQuestion('quizStage', bank[state.idx], state.idx, bank.length, state.answers[state.idx]);
+          Render.updateProgress('quizProgress', state.idx+1, bank.length);
+          Render.toggleNavButtons(state.idx, bank.length);
+          if(state.idx===bank.length-1){ btnNext.hidden = true; btnSubmit.hidden=false; }
         }
+      };
+      btnSubmit.onclick = ()=> {
+        const sel = Render.readAnswer();
+        if(sel==null){ alert('Pilih jawaban dulu ya.'); return; }
+        state.answers[state.idx]=sel;
+        const result = App.scoreBank(bank, state.answers);
+        Render.showResult(result, sesi);
+      };
+
+      document.getElementById('sessionSelect').addEventListener('change', (e)=>{
+        const s = Number(e.target.value);
+        location.href = `latihan.html?sesi=${s}`;
       });
-    }
-
-    function escapeHTML(s) {
-      return String(s).replace(/[&<>"']/g, m => ({
-        '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
-      }[m]));
-    }
-
-    // ---------- Actions ----------
-    btnPrev.addEventListener('click', () => {
-      if (idx > 0) { idx--; render(); }
-      scrollToTop();
-    });
-
-    btnNext.addEventListener('click', () => {
-      if (idx < BANK.length - 1) { idx++; render(); }
-      scrollToTop();
-    });
-
-    btnSubmit.addEventListener('click', () => {
-      const total = BANK.length;
-      let correct = 0;
-      const review = [];
-
-      for (const q of BANK) {
-        const picked = answers.get(q.id) || '(kosong)';
-        const isRight = picked === q.correctKey;
-        if (isRight) correct++;
-
-        const pickedText  = (q.choices.find(c => c.key === picked) || {}).t || '(kosong)';
-        const correctText = (q.choices.find(c => c.key === q.correctKey) || {}).t || '';
-
-        review.push(`
-          <div class="entry">
-            <div class="jp">${escapeHTML(q.prompt)}</div>
-            <div class="id" style="margin-top:.35rem">
-              Jawaban kamu: <b style="color:${isRight ? 'var(--ok)' : 'var(--danger)'}">${escapeHTML(pickedText)}</b>
-              ${isRight ? '' : `<div class="muted">Kunci: <b>${escapeHTML(correctText)}</b></div>`}
-            </div>
-          </div>
-        `);
-      }
-
-      scoreLine.textContent = `Skor: ${correct} / ${total}`;
-      answerReview.innerHTML = review.join('');
-
-      // tampilkan hasil
-      quizCard.classList.add('hidden');
-      resultCard.classList.remove('hidden');
-      scrollToTop();
-    });
-
-    function scrollToTop() {
-      try { window.scrollTo({ top: 0, behavior: 'smooth' }); } catch {}
-    }
-
-    // ---------- Boot ----------
-    render();
+    })();
   </script>
 </body>
 </html>

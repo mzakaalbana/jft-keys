@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Ujian — JFT Keys</title>
+  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="stylesheet" href="assets/css/styles.css" />
+</head>
+<body class="page exam-page">
+  <header class="site-header">
+    <nav class="topnav container">
+      <a href="index.html" class="brand">JFT Keys</a>
+      <div class="spacer"></div>
+      <a href="belajar.html?sesi=1" class="link">Belajar</a>
+      <a href="latihan.html?sesi=1" class="link">Latihan</a>
+      <a href="ujian.html?sesi=1" class="link active">Ujian</a>
+    </nav>
+  </header>
+
+  <main class="container">
+    <section class="card quiz-card">
+      <div class="quiz-head" style="display:flex;gap:.75rem;align-items:center;flex-wrap:wrap">
+        <div class="pill" id="quizProgress">Soal 1 / 1</div>
+        <h1 class="quiz-title" id="pageTitle">Ujian — Sesi 1</h1>
+        <label class="muted" for="sessionSelect">Ganti sesi:</label>
+        <select id="sessionSelect" class="btn" style="padding:.45rem .6rem">
+          <option value="1">Sesi 1</option>
+          <option value="2">Sesi 2</option>
+          <option value="3">Sesi 3</option>
+          <option value="4">Sesi 4</option>
+        </select>
+        <span class="spacer"></span>
+        <a id="toLearn" class="btn" href="belajar.html?sesi=1">Ke Belajar</a>
+        <a id="toPractice" class="btn" href="latihan.html?sesi=1">Ke Latihan</a>
+      </div>
+
+      <div id="quizStage">
+        <div class="skeleton">
+          <div class="skeleton-line w-80"></div>
+          <div class="skeleton-line w-90"></div>
+          <div class="skeleton-line w-70"></div>
+        </div>
+      </div>
+
+      <div class="quiz-actions">
+        <button id="btnPrev" class="btn ghost" disabled>Sebelumnya</button>
+        <div class="spacer"></div>
+        <button id="btnNext" class="btn">Selanjutnya</button>
+        <button id="btnSubmit" class="btn primary" hidden>Selesai & Lihat Skor</button>
+      </div>
+    </section>
+
+    <section id="resultCard" class="card result-card hidden">
+      <h2>Hasil Ujian</h2>
+      <p id="scoreLine" class="lead">Skor: 0/0</p>
+      <details class="details">
+        <summary>Lihat koreksi & pembahasan</summary>
+        <div id="answerReview"></div>
+      </details>
+      <div class="result-actions">
+        <a id="retryLink" href="#" class="btn">Ulangi Ujian</a>
+        <a id="learnLink" href="#" class="btn ghost">Ke Halaman Belajar</a>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <small>© JFT Keys</small>
+    </div>
+  </footer>
+
+  <script src="assets/js/app.js"></script>
+  <script src="assets/js/render.js"></script>
+  <script>
+    (async function init(){
+      const sesi = App.getSessionFromURL() || 1;
+      document.getElementById('sessionSelect').value = String(sesi);
+
+      const data = await App.loadData();
+      const sess = App.pickSession(data, sesi);
+
+      Render.updatePageTitle('Ujian', sesi);
+      Render.updateExamLinks({learn:'toLearn', practice:'toPractice'}, sesi);
+
+      // Ujian pakai semua item jadi soal (dibentuk MCQ otomatis)
+      const bank = App.buildExamBank(sess.items);
+      const state = { idx:0, answers:[], bank };
+      Render.renderQuestion('quizStage', bank[state.idx], state.idx, bank.length);
+      Render.updateProgress('quizProgress', state.idx+1, bank.length);
+      Render.toggleNavButtons(state.idx, bank.length);
+
+      const btnPrev = document.getElementById('btnPrev');
+      const btnNext = document.getElementById('btnNext');
+      const btnSubmit = document.getElementById('btnSubmit');
+
+      btnPrev.onclick = ()=> {
+        if(state.idx>0){ state.idx--; Render.renderQuestion('quizStage', bank[state.idx], state.idx, bank.length, state.answers[state.idx]); Render.updateProgress('quizProgress', state.idx+1, bank.length); Render.toggleNavButtons(state.idx, bank.length); if(state.idx<bank.length-1){ btnNext.hidden=false; btnSubmit.hidden=true; } }
+      };
+      btnNext.onclick = ()=> {
+        const sel = Render.readAnswer();
+        if(sel==null){ alert('Pilih jawaban dulu ya.'); return; }
+        state.answers[state.idx]=sel;
+        if(state.idx<bank.length-1){
+          state.idx++;
+          Render.renderQuestion('quizStage', bank[state.idx], state.idx, bank.length, state.answers[state.idx]);
+          Render.updateProgress('quizProgress', state.idx+1, bank.length);
+          Render.toggleNavButtons(state.idx, bank.length);
+          if(state.idx===bank.length-1){ btnNext.hidden = true; btnSubmit.hidden=true; /* ujian -> tidak auto tampil submit sampai akhir */ }
+        }
+        if(state.idx===bank.length-1){ btnNext.hidden = true; btnSubmit.hidden=false; }
+      };
+      btnSubmit.onclick = ()=> {
+        const sel = Render.readAnswer();
+        if(sel==null){ alert('Pilih jawaban dulu ya.'); return; }
+        state.answers[state.idx]=sel;
+        const result = App.scoreBank(bank, state.answers, {showExplanation:true});
+        Render.showResult(result, sesi, {mode:'exam'});
+      };
+
+      document.getElementById('sessionSelect').addEventListener('change', (e)=>{
+        const s = Number(e.target.value);
+        location.href = `ujian.html?sesi=${s}`;
+      });
+    })();
+  </script>
+</body>
+</html>

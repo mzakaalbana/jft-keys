@@ -2,95 +2,54 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>JFT Keys – Menu Utama</title>
-
-  <!-- Styles -->
-  <link rel="stylesheet" href="./assets/css/styles.css?v=2" />
-
-  <!-- Scripts -->
-  <script defer src="./assets/js/store.js?v=2"></script>
-  <script defer src="./assets/js/bank.js?v=2"></script>
-  <script defer src="./assets/js/render.js?v=2"></script>
-  <script defer src="./assets/js/app.js?v=2"></script>
-
-  <style>
-    :root {
-      --bg: #0b1220;
-      --card: #111a2b;
-      --muted: #8aa0c4;
-      --text: #e7eefc;
-      --accent: #7cc0ff;
-      --ok: #88f7b1;
-      --danger: #ff8aa1;
-      --line: #1e2940;
-    }
-    body {
-      margin: 0;
-      background: var(--bg);
-      font-family: 'Inter', sans-serif;
-      color: var(--text);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      min-height: 100vh;
-    }
-    nav {
-      display: flex;
-      gap: 1rem;
-      margin-bottom: 2rem;
-    }
-    a.nav-btn {
-      text-decoration: none;
-      color: var(--text);
-      background: var(--card);
-      padding: .6rem 1.2rem;
-      border-radius: 0.5rem;
-      border: 1px solid var(--line);
-      transition: 0.25s;
-    }
-    a.nav-btn:hover {
-      background: var(--accent);
-      color: #000;
-    }
-    .card {
-      background: var(--card);
-      padding: 2rem;
-      border-radius: 1rem;
-      box-shadow: 0 0 20px rgba(0,0,0,.3);
-      max-width: 500px;
-      text-align: center;
-    }
-    h1 {
-      margin-top: 0;
-      font-size: 1.8rem;
-    }
-  </style>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>JFT Keys — Beranda</title>
+  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="stylesheet" href="assets/css/styles.css" />
 </head>
-<body>
-  <nav>
-    <a href="./belajar.html" class="nav-btn">Belajar</a>
-    <a href="./latihan.html" class="nav-btn">Latihan</a>
-    <a href="./ujian.html" class="nav-btn">Ujian</a>
-  </nav>
+<body class="page home-page">
+  <header class="site-header">
+    <nav class="topnav container">
+      <a href="index.html" class="brand">JFT Keys</a>
+      <div class="spacer"></div>
+      <a href="belajar.html?sesi=1" class="link">Belajar</a>
+      <a href="latihan.html?sesi=1" class="link">Latihan</a>
+      <a href="ujian.html?sesi=1" class="link">Ujian</a>
+    </nav>
+  </header>
 
-  <div class="card">
-    <h1>JFT Keys</h1>
-    <p>Platform belajar dan latihan kisi-kisi JFT-Basic A2.</p>
-    <p style="color: var(--muted); margin-top: 1rem;">
-      Mulai dengan memilih menu di atas.
-    </p>
-  </div>
+  <main class="container">
+    <section class="card">
+      <h1 class="quiz-title">Selamat datang 👋</h1>
+      <p class="muted">Pilih mode dan sesi yang ingin dipelajari/diujikan.</p>
 
-  <!-- Service Worker disabled sementara -->
-  <script>
-  // SEMENTARA dimatikan agar cache lama tidak mengganggu
-  // if ('serviceWorker' in navigator) {
-  //   window.addEventListener('load', () => {
-  //     navigator.serviceWorker.register('./sw.js');
-  //   });
-  // }
-  </script>
+      <div class="grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1rem;margin-top:1rem">
+        <a class="btn primary" href="belajar.html?sesi=1">Belajar (Sesi 1)</a>
+        <a class="btn" href="latihan.html?sesi=1">Latihan (Sesi 1)</a>
+        <a class="btn" href="ujian.html?sesi=1">Ujian (Sesi 1)</a>
+      </div>
+
+      <div class="card" style="margin-top:1rem">
+        <h2 style="margin:0 0 .5rem">Pilih cepat</h2>
+        <div style="display:flex;flex-wrap:wrap;gap:.5rem">
+          <a class="pill" href="belajar.html?sesi=1">Belajar S1</a>
+          <a class="pill" href="belajar.html?sesi=2">Belajar S2</a>
+          <a class="pill" href="belajar.html?sesi=3">Belajar S3</a>
+          <a class="pill" href="belajar.html?sesi=4">Belajar S4</a>
+          <span class="spacer"></span>
+          <a class="pill" href="latihan.html?sesi=2">Latihan S2</a>
+          <a class="pill" href="ujian.html?sesi=3">Ujian S3</a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <small>© JFT Keys</small>
+    </div>
+  </footer>
+
+  <script src="assets/js/app.js"></script>
 </body>
 </html>
