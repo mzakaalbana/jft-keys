@@ -3,19 +3,94 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>JFT Keys – Belajar & Kisi-kisi</title>
-  <link rel="stylesheet" href="assets/css/styles.css" />
+  <title>JFT Keys – Menu Utama</title>
+
+  <!-- Styles -->
+  <link rel="stylesheet" href="./assets/css/styles.css?v=2" />
+
+  <!-- Scripts -->
+  <script defer src="./assets/js/store.js?v=2"></script>
+  <script defer src="./assets/js/bank.js?v=2"></script>
+  <script defer src="./assets/js/render.js?v=2"></script>
+  <script defer src="./assets/js/app.js?v=2"></script>
+
+  <style>
+    :root {
+      --bg: #0b1220;
+      --card: #111a2b;
+      --muted: #8aa0c4;
+      --text: #e7eefc;
+      --accent: #7cc0ff;
+      --ok: #88f7b1;
+      --danger: #ff8aa1;
+      --line: #1e2940;
+    }
+    body {
+      margin: 0;
+      background: var(--bg);
+      font-family: 'Inter', sans-serif;
+      color: var(--text);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+    }
+    nav {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+    a.nav-btn {
+      text-decoration: none;
+      color: var(--text);
+      background: var(--card);
+      padding: .6rem 1.2rem;
+      border-radius: 0.5rem;
+      border: 1px solid var(--line);
+      transition: 0.25s;
+    }
+    a.nav-btn:hover {
+      background: var(--accent);
+      color: #000;
+    }
+    .card {
+      background: var(--card);
+      padding: 2rem;
+      border-radius: 1rem;
+      box-shadow: 0 0 20px rgba(0,0,0,.3);
+      max-width: 500px;
+      text-align: center;
+    }
+    h1 {
+      margin-top: 0;
+      font-size: 1.8rem;
+    }
+  </style>
 </head>
 <body>
-  <main class="container">
+  <nav>
+    <a href="./belajar.html" class="nav-btn">Belajar</a>
+    <a href="./latihan.html" class="nav-btn">Latihan</a>
+    <a href="./ujian.html" class="nav-btn">Ujian</a>
+  </nav>
+
+  <div class="card">
     <h1>JFT Keys</h1>
-    <p>Pilih sesi untuk mulai belajar atau latihan.</p>
-    <div class="menu">
-      <a href="belajar.html" class="btn">Belajar</a>
-      <a href="latihan.html" class="btn">Latihan</a>
-      <a href="ujian.html" class="btn">Ujian</a>
-    </div>
-  </main>
-  <script src="assets/js/app.js"></script>
+    <p>Platform belajar dan latihan kisi-kisi JFT-Basic A2.</p>
+    <p style="color: var(--muted); margin-top: 1rem;">
+      Mulai dengan memilih menu di atas.
+    </p>
+  </div>
+
+  <!-- Service Worker disabled sementara -->
+  <script>
+  // SEMENTARA dimatikan agar cache lama tidak mengganggu
+  // if ('serviceWorker' in navigator) {
+  //   window.addEventListener('load', () => {
+  //     navigator.serviceWorker.register('./sw.js');
+  //   });
+  // }
+  </script>
 </body>
 </html>
