@@ -1,119 +1,129 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>KISI-KISI JFT</title>
-  <link rel="manifest" href="manifest.webmanifest" />
   <link rel="stylesheet" href="assets/css/styles.css" />
-  <meta name="theme-color" content="#d6b25e" />
 </head>
 <body>
   <header class="site-header">
-    <nav class="container topnav">
-      <div class="brand">KISI-KISI JFT</div>
-
-      <div class="tabs" role="tablist" aria-label="Mode Pembelajaran">
-        <button class="tab" data-mode="learn" id="tab-learn" aria-selected="true">Belajar</button>
-        <button class="tab" data-mode="practice" id="tab-practice">Latihan</button>
-        <button class="tab" data-mode="exam" id="tab-exam">Ujian</button>
+    <div class="container header-row">
+      <div class="brand">
+        <span class="brand-mark" aria-hidden="true">✦</span>
+        <span class="brand-text">KISI-KISI JFT</span>
       </div>
-
-      <div class="sessions" role="tablist" aria-label="Pilih Sesi">
-        <button class="chip" data-session="s1" aria-selected="true">S1</button>
-        <button class="chip" data-session="s2">S2</button>
-        <button class="chip" data-session="s3">S3</button>
-        <button class="chip" data-session="s4">S4</button>
-      </div>
-    </nav>
+      <nav class="tabs" role="tablist" aria-label="Mode">
+        <button class="tab is-active" data-route="belajar" role="tab" aria-selected="true">Belajar</button>
+        <button class="tab" data-route="latihan" role="tab" aria-selected="false">Latihan</button>
+        <button class="tab" data-route="ujian" role="tab" aria-selected="false">Ujian</button>
+      </nav>
+    </div>
   </header>
 
-  <main class="container page">
-    <!-- BELAJAR -->
-    <section id="panel-learn" class="panel active" aria-labelledby="tab-learn">
-      <header class="panel-head">
-        <h1>📚 Belajar — <span id="learnSessionName">Sesi 1</span></h1>
-        <p class="muted">Mode hafalan cepat. Format <b>kanji (hiragana)</b> dan arti Indonesia.</p>
-      </header>
-      <div id="learnList" class="grid"></div>
+  <main class="container">
+    <section class="toolbar card">
+      <div class="row">
+        <label class="field">
+          <span class="label">Pilih Sesi</span>
+          <select id="sessionSelect" class="select"></select>
+        </label>
+        <label class="field grow">
+          <span class="label">Cari item</span>
+          <input id="searchInput" type="search" class="input" placeholder="Cari teks (mis. たいふう, 住所, しつもん)"/>
+        </label>
+        <div class="field compact">
+          <span class="label">&nbsp;</span>
+          <button id="btnShuffle" class="btn ghost">Acak</button>
+        </div>
+      </div>
     </section>
 
-    <!-- LATIHAN -->
-    <section id="panel-practice" class="panel" aria-labelledby="tab-practice">
-      <header class="panel-head">
-        <h1>📝 Latihan — <span id="practiceSessionName">Sesi 1</span></h1>
-        <p class="muted">Jawab satu per satu, bisa mundur/maju. Skor tampil langsung saat submit.</p>
+    <section id="screen-belajar" class="screen card">
+      <header class="section-head">
+        <h1 class="h1">Belajar</h1>
+        <p class="muted">Daftar item dari sesi terpilih. Tap untuk menyorot.</p>
       </header>
-
-      <div id="practiceStage" class="card">
-        <div class="skeleton">
-          <div class="skeleton-line w-80"></div>
-          <div class="skeleton-line w-90"></div>
-          <div class="skeleton-line w-70"></div>
-        </div>
-      </div>
-
-      <div class="row actions">
-        <button id="btnPrevP" class="btn ghost" disabled>Sebelumnya</button>
-        <div class="spacer"></div>
-        <button id="btnSubmitP" class="btn outline">Submit</button>
-        <button id="btnNextP" class="btn">Selanjutnya</button>
-      </div>
-
-      <section id="practiceResult" class="card hidden">
-        <h3>Hasil Latihan</h3>
-        <p id="practiceScore" class="lead">Skor: 0/0</p>
-        <details>
-          <summary>Lihat koreksi</summary>
-          <div id="practiceReview"></div>
-        </details>
-        <div class="row actions">
-          <button id="btnRetryP" class="btn">Ulangi</button>
-        </div>
-      </section>
+      <div id="learnList" class="list"></div>
+      <div class="empty hidden" id="emptyLearn">Tidak ada hasil.</div>
     </section>
 
-    <!-- UJIAN -->
-    <section id="panel-exam" class="panel" aria-labelledby="tab-exam">
-      <header class="panel-head">
-        <h1>🎯 Ujian — <span id="examSessionName">Sesi 1</span></h1>
-        <p class="muted">Jawab semua dulu. Skor & koreksi muncul setelah tekan <b>Finish</b>.</p>
+    <section id="screen-latihan" class="screen card hidden">
+      <header class="section-head">
+        <h1 class="h1">Latihan (Flashcard)</h1>
+        <p class="muted">Satu per satu. Tandai <b>Ingat</b> / <b>Ulangi</b>.</p>
       </header>
 
-      <div id="examStage" class="card">
-        <div class="skeleton">
-          <div class="skeleton-line w-80"></div>
-          <div class="skeleton-line w-90"></div>
-          <div class="skeleton-line w-70"></div>
+      <div id="drillBox" class="drill">
+        <div class="drill-card">
+          <div class="drill-num" id="drillNum">0/0</div>
+          <div class="drill-text" id="drillText">—</div>
+        </div>
+        <div class="drill-actions">
+          <button id="btnPrev" class="btn ghost" disabled>‹ Sebelumnya</button>
+          <div class="spacer"></div>
+          <button id="btnAgain" class="btn danger">Ulangi</button>
+          <button id="btnKnow" class="btn ok">Ingat</button>
+          <button id="btnNext" class="btn">Berikutnya ›</button>
+        </div>
+        <div class="progress">
+          <div id="drillBar" class="bar"></div>
+        </div>
+        <div class="muted tiny" id="drillStat">Ingat: 0 • Ulangi: 0</div>
+      </div>
+      <div class="empty hidden" id="emptyDrill">Tidak ada item untuk dilatih.</div>
+    </section>
+
+    <section id="screen-ujian" class="screen card hidden">
+      <header class="section-head">
+        <h1 class="h1">Ujian Cepat</h1>
+        <p class="muted">Ambil 10 item acak dari sesi terpilih. Nilai akan muncul di akhir.</p>
+      </header>
+
+      <div id="quizBox" class="quiz">
+        <div class="quiz-head">
+          <div id="quizProg" class="pill">Soal 0/0</div>
+          <div class="spacer"></div>
+          <button id="btnStartQuiz" class="btn">Mulai Ujian</button>
+        </div>
+
+        <div id="quizStage" class="quiz-stage hidden">
+          <div class="q-card">
+            <div class="q-num" id="qNum">1/10</div>
+            <div class="q-text" id="qText">—</div>
+            <div class="q-options" id="qOptions"></div>
+          </div>
+          <div class="quiz-actions">
+            <button id="btnPrevQ" class="btn ghost" disabled>‹ Kembali</button>
+            <div class="spacer"></div>
+            <button id="btnNextQ" class="btn">Lanjut ›</button>
+            <button id="btnSubmitQuiz" class="btn primary hidden">Selesai &amp; Nilai</button>
+          </div>
+        </div>
+
+        <div id="quizResult" class="quiz-result hidden">
+          <h2 class="h2">Hasil</h2>
+          <p id="quizScore" class="lead">Skor: 0/0</p>
+          <details class="details">
+            <summary>Ringkasan jawaban</summary>
+            <div id="quizReview" class="review"></div>
+          </details>
+          <div class="quiz-actions">
+            <button id="btnRetry" class="btn">Ulangi</button>
+          </div>
         </div>
       </div>
 
-      <div class="row actions">
-        <button id="btnPrevE" class="btn ghost" disabled>Sebelumnya</button>
-        <div class="spacer"></div>
-        <button id="btnFinishE" class="btn outline">Finish</button>
-        <button id="btnNextE" class="btn">Selanjutnya</button>
-      </div>
-
-      <section id="examResult" class="card hidden">
-        <h3>Hasil Ujian</h3>
-        <p id="examScore" class="lead">Skor: 0/0</p>
-        <details>
-          <summary>Lihat koreksi</summary>
-          <div id="examReview"></div>
-        </details>
-        <div class="row actions">
-          <button id="btnRetryE" class="btn">Ulangi</button>
-        </div>
-      </section>
+      <div class="empty hidden" id="emptyQuiz">Tidak ada item untuk ujian.</div>
     </section>
   </main>
 
   <footer class="site-footer">
-    <div class="container muted small">© KISI-KISI JFT • UI/UX gold theme</div>
+    <div class="container">
+      <small>© <span id="y"></span> KISI-KISI JFT • Dibuat untuk belajar mandiri</small>
+    </div>
   </footer>
 
-  <script src="assets/js/render.js"></script>
   <script src="assets/js/app.js"></script>
 </body>
 </html>

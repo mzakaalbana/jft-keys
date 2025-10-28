@@ -1,237 +1,334 @@
-import { el, skeletonLines, renderLearnList, renderQuestionCard, renderReview } from './render.js';
-
+// ====== Config & State ======
+const DATA_URL = "data/kisi-jft.json";
 const state = {
-  mode: 'learn',       // 'learn' | 'practice' | 'exam'
-  session: 's1',       // 's1'..'s4'
-  data: { s1: [], s2: [], s3: [], s4: [] },
-  // practice
-  pIndex: 0,
-  pAnswers: [],
-  // exam
-  eIndex: 0,
-  eAnswers: [],
+  data: null,            // JSON bank
+  route: "belajar",      // belajar | latihan | ujian
+  currentSessionId: null,
+  learnFilter: "",
+  // Latihan
+  drillIdx: 0,
+  drillOrder: [],
+  drillMarks: {}, // index -> "ok" | "ng"
+  // Ujian
+  quizItems: [],
+  quizIdx: 0,
+  quizAnswers: {}, // idx -> choice string
 };
 
-const panels = {
-  learn: document.getElementById('panel-learn'),
-  practice: document.getElementById('panel-practice'),
-  exam: document.getElementById('panel-exam'),
-};
+// ====== Helpers ======
+const $ = (q) => document.querySelector(q);
+const $$ = (q) => document.querySelectorAll(q);
+const show = (el) => el.classList.remove("hidden");
+const hide = (el) => el.classList.add("hidden");
+const clamp = (n,min,max)=>Math.max(min,Math.min(max,n));
+const shuffle = (arr) => arr.map(v=>[Math.random(),v]).sort((a,b)=>a[0]-b[0]).map(x=>x[1]);
 
-const learnList = document.getElementById('learnList');
-const learnSessName = document.getElementById('learnSessionName');
-const practiceSessName = document.getElementById('practiceSessionName');
-const examSessName = document.getElementById('examSessionName');
-
-// Practice controls
-const pStage = document.getElementById('practiceStage');
-const btnPrevP = document.getElementById('btnPrevP');
-const btnNextP = document.getElementById('btnNextP');
-const btnSubmitP = document.getElementById('btnSubmitP');
-const pResult = document.getElementById('practiceResult');
-const pScore = document.getElementById('practiceScore');
-const pReview = document.getElementById('practiceReview');
-const btnRetryP = document.getElementById('btnRetryP');
-
-// Exam controls
-const eStage = document.getElementById('examStage');
-const btnPrevE = document.getElementById('btnPrevE');
-const btnNextE = document.getElementById('btnNextE');
-const btnFinishE = document.getElementById('btnFinishE');
-const eResult = document.getElementById('examResult');
-const eScore = document.getElementById('examScore');
-const eReview = document.getElementById('examReview');
-const btnRetryE = document.getElementById('btnRetryE');
-
-boot();
-
-async function boot(){
-  attachNav();
-  await loadData();
-  applyHash(); // initial route
-  if ('serviceWorker' in navigator) {
-    try { navigator.serviceWorker.register('./sw.js'); } catch {}
-  }
+function getSessionById(id){
+  return state.data?.sessions?.find(s=>String(s.id)===String(id));
 }
-
-function attachNav(){
-  document.querySelectorAll('.tab').forEach(btn=>{
-    btn.addEventListener('click', ()=>{
-      state.mode = btn.dataset.mode;
-      updateTabs();
-      render();
-      updateHash();
-    });
-  });
-  document.querySelectorAll('.chip').forEach(ch=>{
-    ch.addEventListener('click', ()=>{
-      state.session = ch.dataset.session;
-      updateChips();
-      resetModeState();
-      render();
-      updateHash();
-    });
-  });
-
-  // Practice events
-  btnPrevP.onclick = ()=> { saveCurrent('practice'); step(-1,'practice'); };
-  btnNextP.onclick = ()=> { saveCurrent('practice'); step(+1,'practice'); };
-  btnSubmitP.onclick = ()=> { saveCurrent('practice'); showPracticeResult(); };
-  btnRetryP.onclick = ()=> { resetPractice(); renderPractice(); };
-
-  // Exam events
-  btnPrevE.onclick = ()=> { saveCurrent('exam'); step(-1,'exam'); };
-  btnNextE.onclick = ()=> { saveCurrent('exam'); step(+1,'exam'); };
-  btnFinishE.onclick = ()=> { saveCurrent('exam'); showExamResult(); };
-  btnRetryE.onclick = ()=> { resetExam(); renderExam(); };
-
-  window.addEventListener('hashchange', applyHash);
+function currentItems(){
+  const s = getSessionById(state.currentSessionId);
+  return s?.items || [];
 }
-
-function updateTabs(){
-  document.querySelectorAll('.tab').forEach(b=>b.setAttribute('aria-selected', b.dataset.mode===state.mode));
-  Object.keys(panels).forEach(k => panels[k].classList.toggle('active', k===state.mode));
-}
-function updateChips(){
-  document.querySelectorAll('.chip').forEach(c=>c.setAttribute('aria-selected', c.dataset.session===state.session));
-  learnSessName.textContent = sessionLabel();
-  practiceSessName.textContent = sessionLabel();
-  examSessName.textContent = sessionLabel();
-}
-function sessionLabel(){
-  return 'Sesi ' + state.session.toUpperCase().replace('S','');
-}
-
-function updateHash(){
-  location.hash = `#${state.mode}-${state.session}`;
-}
-function applyHash(){
-  const m = location.hash.match(/#(learn|practice|exam)-(s[1-4])/i);
-  if (m){ state.mode=m[1]; state.session=m[2]; }
-  updateTabs(); updateChips();
-  resetModeState(); render();
-}
-
-async function loadData(){
+function persist(){
   try{
-    const res = await fetch('data/jft-keys.json', {cache:'no-store'});
-    const json = await res.json();
-    // expect { s1:[], s2:[], s3:[], s4:[] }
-    state.data = Object.assign({s1:[],s2:[],s3:[],s4:[]}, json || {});
-  }catch{
-    state.data = {s1:[],s2:[],s3:[],s4:[]};
-  }
+    localStorage.setItem("kisi-jft-prefs", JSON.stringify({
+      currentSessionId: state.currentSessionId,
+      route: state.route,
+    }));
+  }catch{}
+}
+function restore(){
+  try{
+    const saved = JSON.parse(localStorage.getItem("kisi-jft-prefs")||"{}");
+    if(saved.currentSessionId) state.currentSessionId = saved.currentSessionId;
+    if(saved.route) state.route = saved.route;
+  }catch{}
 }
 
-/* RENDER ROUTER */
-function render(){
-  if (state.mode==='learn') renderLearn();
-  else if (state.mode==='practice') renderPractice();
-  else renderExam();
-}
+// ====== UI: Tabs / Routing ======
+function setRoute(route){
+  state.route = route;
+  persist();
 
-/* LEARN */
-function renderLearn(){
-  learnList.innerHTML = '';
-  learnList.append(skeletonLines(3));
-  const items = state.data[state.session] || [];
-  setTimeout(()=>renderLearnList(learnList, items), 100);
-}
-
-/* PRACTICE */
-function resetPractice(){
-  state.pIndex = 0;
-  state.pAnswers = [];
-  pResult.classList.add('hidden');
-}
-function renderPractice(){
-  const qs = toQuestions(state.data[state.session]);
-  if (!qs.length){
-    pStage.innerHTML = `<div class="card"><div class="muted">Belum ada soal.</div></div>`;
-    btnPrevP.disabled = btnNextP.disabled = btnSubmitP.disabled = true;
-    return;
-  }
-  btnPrevP.disabled = state.pIndex===0;
-  btnNextP.disabled = state.pIndex===qs.length-1;
-  btnSubmitP.disabled = false;
-
-  const selected = state.pAnswers[state.pIndex] ?? null;
-  renderQuestionCard(pStage, qs[state.pIndex], state.pIndex, qs.length, selected, false);
-}
-function showPracticeResult(){
-  const qs = toQuestions(state.data[state.session]);
-  const total = qs.length;
-  const score = qs.reduce((acc,q,i)=>acc + (q.correctKey === (state.pAnswers[i]??null) ? 1:0), 0);
-  pScore.textContent = `Skor: ${score} / ${total}`;
-  renderReview(pReview, qs, state.pAnswers);
-  pResult.classList.remove('hidden');
-}
-
-/* EXAM */
-function resetExam(){
-  state.eIndex = 0;
-  state.eAnswers = [];
-  eResult.classList.add('hidden');
-}
-function renderExam(){
-  const qs = toQuestions(state.data[state.session]);
-  if (!qs.length){
-    eStage.innerHTML = `<div class="card"><div class="muted">Belum ada soal.</div></div>`;
-    btnPrevE.disabled = btnNextE.disabled = btnFinishE.disabled = true;
-    return;
-  }
-  btnPrevE.disabled = state.eIndex===0;
-  btnNextE.disabled = state.eIndex===qs.length-1;
-  btnFinishE.disabled = false;
-
-  const selected = state.eAnswers[state.eIndex] ?? null;
-  renderQuestionCard(eStage, qs[state.eIndex], state.eIndex, qs.length, selected, false);
-}
-function showExamResult(){
-  const qs = toQuestions(state.data[state.session]);
-  const total = qs.length;
-  const score = qs.reduce((acc,q,i)=>acc + (q.correctKey === (state.eAnswers[i]??null) ? 1:0), 0);
-  eScore.textContent = `Skor: ${score} / ${total}`;
-  renderReview(eReview, qs, state.eAnswers);
-  eResult.classList.remove('hidden');
-}
-
-/* helpers */
-function saveCurrent(mode){
-  const stage = mode==='practice' ? pStage : eStage;
-  const idx = mode==='practice' ? state.pIndex : state.eIndex;
-  const sel = stage.querySelector('input[type="radio"]:checked');
-  const key = sel ? sel.value : null;
-  if (mode==='practice') state.pAnswers[idx] = key;
-  else state.eAnswers[idx] = key;
-}
-function step(n, mode){
-  if (mode==='practice'){
-    state.pIndex = clamp(state.pIndex + n, 0, toQuestions(state.data[state.session]).length-1);
-    renderPractice();
-  }else{
-    state.eIndex = clamp(state.eIndex + n, 0, toQuestions(state.data[state.session]).length-1);
-    renderExam();
-  }
-}
-function clamp(x, a, b){ return Math.max(a, Math.min(b, x)); }
-
-/* convert learn items to simple MCQ (fallback) */
-function toQuestions(items){
-  // Expect item: { jp, hira, id, choices?, correctKey? }
-  // If not provided, generate dummy 3 pilihan dari teks yang sama.
-  return (items||[]).map((it, i) => {
-    if (it.choices && it.correctKey) return it;
-    const text = `${it.jp ?? it.prompt ?? ''} ${it.hira ? '('+it.hira+')':''}`;
-    return {
-      id: i+1,
-      prompt: text || `Item ${i+1}`,
-      choices: [
-        {t: it.id ?? it.idn ?? '—', key:'A'},
-        {t: '—', key:'B'},
-        {t: '—', key:'C'},
-      ],
-      correctKey:'A'
-    };
+  $$(".tab").forEach(t=>{
+    const r = t.getAttribute("data-route");
+    t.classList.toggle("is-active", r===route);
+    t.setAttribute("aria-selected", r===route ? "true":"false");
   });
+
+  ["belajar","latihan","ujian"].forEach(r=>{
+    const el = $("#screen-"+r);
+    if(!el) return;
+    if(r===route) show(el); else hide(el);
+  });
+
+  if(route==="belajar") renderBelajar();
+  if(route==="latihan") bootLatihan();
+  if(route==="ujian") bootUjian();
 }
+
+// ====== Populate Session Select ======
+function populateSessions(){
+  const sel = $("#sessionSelect");
+  sel.innerHTML = "";
+  (state.data?.sessions || []).forEach(s=>{
+    const opt = document.createElement("option");
+    opt.value = s.id;
+    opt.textContent = s.title || ("Sesi " + s.id);
+    sel.appendChild(opt);
+  });
+  // default
+  if(!state.currentSessionId){
+    state.currentSessionId = state.data?.sessions?.[0]?.id || 1;
+  }
+  sel.value = state.currentSessionId;
+}
+
+// ====== Belajar ======
+function renderBelajar(){
+  const list = $("#learnList");
+  const empty = $("#emptyLearn");
+  const items = currentItems();
+  const q = (state.learnFilter||"").trim().toLowerCase();
+
+  let view = items.map((t,i)=>({i:i+1, t, k: t.toLowerCase()}));
+  if(q) view = view.filter(x=>x.k.includes(q));
+
+  list.innerHTML = "";
+  if(view.length===0){
+    show(empty); return;
+  } else hide(empty);
+
+  const frag = document.createDocumentFragment();
+  view.forEach(row=>{
+    const it = document.createElement("div");
+    it.className = "item";
+    const num = document.createElement("div");
+    num.className = "idx";
+    num.textContent = row.i;
+    const text = document.createElement("div");
+    text.className = "text";
+    text.innerHTML = highlight(row.t, q);
+    it.appendChild(num);
+    it.appendChild(text);
+    it.addEventListener("click", ()=> it.classList.toggle("hl-wrap"));
+    frag.appendChild(it);
+  });
+  list.appendChild(frag);
+}
+function highlight(text, q){
+  if(!q) return escapeHtml(text);
+  const escQ = q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  return escapeHtml(text).replace(new RegExp(escQ,'gi'), m=>`<span class="hl">${m}</span>`);
+}
+function escapeHtml(s){ return s.replace(/[&<>"']/g, c=>({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;" }[c])) }
+
+// ====== Latihan (Flashcard) ======
+function bootLatihan(){
+  const items = currentItems();
+  const empty = $("#emptyDrill");
+  if(items.length===0){ show(empty); hide($("#drillBox")); return; }
+  hide(empty); show($("#drillBox"));
+
+  state.drillOrder = items.map((_,i)=>i);
+  state.drillIdx = 0;
+  state.drillMarks = {};
+  renderDrill();
+}
+function renderDrill(){
+  const items = currentItems();
+  const idx = clamp(state.drillIdx,0, items.length-1);
+  state.drillIdx = idx;
+
+  $("#drillText").textContent = items[idx] || "—";
+  $("#drillNum").textContent = `${idx+1}/${items.length}`;
+  $("#btnPrev").disabled = idx===0;
+
+  // progress bar: jumlah ok dari total
+  const okCount = Object.values(state.drillMarks).filter(v=>v==="ok").length;
+  const ratio = items.length ? Math.round((okCount/items.length)*100) : 0;
+  $("#drillBar").style.width = ratio+"%";
+  $("#drillStat").textContent = `Ingat: ${okCount} • Ulangi: ${Object.values(state.drillMarks).filter(v=>v==="ng").length}`;
+}
+function markDrill(type){ // "ok" | "ng"
+  state.drillMarks[state.drillIdx] = type;
+  renderDrill();
+}
+function nextDrill(){
+  state.drillIdx = clamp(state.drillIdx+1, 0, currentItems().length-1);
+  renderDrill();
+}
+function prevDrill(){
+  state.drillIdx = clamp(state.drillIdx-1, 0, currentItems().length-1);
+  renderDrill();
+}
+
+// ====== Ujian Cepat (MCQ sederhana) ======
+function bootUjian(){
+  const items = currentItems();
+  const empty = $("#emptyQuiz");
+  if(items.length<4){
+    $("#quizBox").classList.add("hidden");
+    show(empty);
+    return;
+  }
+  hide(empty);
+  $("#quizBox").classList.remove("hidden");
+
+  $("#quizStage").classList.add("hidden");
+  $("#quizResult").classList.add("hidden");
+  $("#btnStartQuiz").classList.remove("hidden");
+  $("#quizProg").textContent = `Soal 0/0`;
+}
+
+function startQuiz(){
+  const pool = currentItems().slice();
+  const take = Math.min(10, pool.length);
+  const indices = shuffle([...Array(pool.length)].map((_,i)=>i)).slice(0,take);
+  state.quizItems = indices.map(i=>pool[i]);
+  state.quizIdx = 0;
+  state.quizAnswers = {};
+  $("#btnStartQuiz").classList.add("hidden");
+  show($("#quizStage"));
+  hide($("#quizResult"));
+  renderQuiz();
+}
+
+function renderQuiz(){
+  const i = clamp(state.quizIdx, 0, state.quizItems.length-1);
+  state.quizIdx = i;
+
+  $("#qNum").textContent = `${i+1}/${state.quizItems.length}`;
+  $("#quizProg").textContent = `Soal ${i+1}/${state.quizItems.length}`;
+  const question = state.quizItems[i];
+  $("#qText").textContent = question;
+
+  // buat 4 opsi: 1 benar (teks sama), 3 pengecoh dari item lain
+  const pool = currentItems().filter(t=>t!==question);
+  const decoys = shuffle(pool).slice(0,3);
+  const options = shuffle([question, ...decoys]);
+
+  const box = $("#qOptions");
+  box.innerHTML = "";
+  options.forEach(opt=>{
+    const id = `opt-${i}-${btoa(opt).slice(0,6)}`;
+    const label = document.createElement("label");
+    label.className = "opt";
+    label.innerHTML = `
+      <input type="radio" name="q${i}" id="${id}" value="${escapeHtml(opt)}">
+      <span>${escapeHtml(opt)}</span>
+    `;
+    const input = label.querySelector("input");
+    input.checked = state.quizAnswers[i] === opt;
+    input.addEventListener("change", ()=>{ state.quizAnswers[i] = opt; });
+    box.appendChild(label);
+  });
+
+  $("#btnPrevQ").disabled = i===0;
+  if(i===state.quizItems.length-1){
+    $("#btnNextQ").classList.add("hidden");
+    $("#btnSubmitQuiz").classList.remove("hidden");
+  }else{
+    $("#btnNextQ").classList.remove("hidden");
+    $("#btnSubmitQuiz").classList.add("hidden");
+  }
+}
+
+function nextQ(){ state.quizIdx = clamp(state.quizIdx+1,0,state.quizItems.length-1); renderQuiz(); }
+function prevQ(){ state.quizIdx = clamp(state.quizIdx-1,0,state.quizItems.length-1); renderQuiz(); }
+
+function submitQuiz(){
+  const items = state.quizItems;
+  let correct = 0;
+  const review = [];
+
+  items.forEach((q,i)=>{
+    const ans = state.quizAnswers[i];
+    const ok = ans === q;
+    if(ok) correct++;
+    review.push({q, ans, ok});
+  });
+
+  $("#quizScore").textContent = `Skor: ${correct}/${items.length}`;
+  const box = $("#quizReview");
+  box.innerHTML = "";
+  review.forEach((r,idx)=>{
+    const div = document.createElement("div");
+    const badge = `<span class="badge ${r.ok?'ok':'ng'}">${r.ok?'Benar':'Salah'}</span>`;
+    div.innerHTML = `${idx+1}. ${escapeHtml(r.q)} ${badge}` + (r.ok ? "" : `<br><span class="muted tiny">Jawabanmu: ${escapeHtml(r.ans||"—")}</span>`);
+    box.appendChild(div);
+  });
+
+  hide($("#quizStage"));
+  show($("#quizResult"));
+}
+
+function retryQuiz(){
+  bootUjian();
+  startQuiz();
+}
+
+// ====== Boot ======
+async function boot(){
+  // year
+  $("#y").textContent = new Date().getFullYear();
+
+  restore();
+
+  // tabs
+  $$(".tab").forEach(t=>{
+    t.addEventListener("click", ()=>{
+      setRoute(t.getAttribute("data-route"));
+    });
+  });
+
+  // selects & inputs
+  $("#sessionSelect").addEventListener("change", (e)=>{
+    state.currentSessionId = e.target.value;
+    persist();
+    // rerender all screens relevant
+    renderBelajar();
+    if(state.route==="latihan") bootLatihan();
+    if(state.route==="ujian") bootUjian();
+  });
+  $("#searchInput").addEventListener("input", (e)=>{
+    state.learnFilter = e.target.value || "";
+    renderBelajar();
+  });
+  $("#btnShuffle").addEventListener("click", ()=>{
+    // hanya urutan tampilan belajar diacak dengan cara mengganti urutan data? Simpel: shuffle copy saat render… 
+    // trik cepat: set filter ke dirinya supaya re-render; dan acak index di list => kita cukup pakai highlight render default + acak DOM:
+    const list = $("#learnList");
+    const nodes = Array.from(list.children);
+    shuffle(nodes).forEach(n=>list.appendChild(n));
+  });
+
+  // latihan
+  $("#btnPrev").addEventListener("click", prevDrill);
+  $("#btnNext").addEventListener("click", nextDrill);
+  $("#btnAgain").addEventListener("click", ()=>markDrill("ng"));
+  $("#btnKnow").addEventListener("click", ()=>markDrill("ok"));
+
+  // ujian
+  $("#btnStartQuiz").addEventListener("click", startQuiz);
+  $("#btnPrevQ").addEventListener("click", prevQ);
+  $("#btnNextQ").addEventListener("click", nextQ);
+  $("#btnSubmitQuiz").addEventListener("click", submitQuiz);
+  $("#btnRetry").addEventListener("click", retryQuiz);
+
+  // load data
+  try{
+    const res = await fetch(DATA_URL, {cache:"no-store"});
+    state.data = await res.json();
+  }catch(err){
+    console.error("Gagal memuat data:", err);
+    state.data = { brand:"KISI-KISI JFT", version:"1.0", sessions:[] };
+  }
+
+  populateSessions();
+  setRoute(state.route || "belajar");
+  renderBelajar();
+}
+
+document.addEventListener("DOMContentLoaded", boot);
